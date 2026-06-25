@@ -30,6 +30,11 @@ drai:
     api-key: ${OPENAI_API_KEY:}
     fast-model: ${DRAI_LLM_FAST_MODEL:qwen3-max}
     smart-model: ${DRAI_LLM_SMART_MODEL:deepseek-r1}
+    timeout: ${DRAI_LLM_TIMEOUT:30s}
+    max-attempts: ${DRAI_LLM_MAX_ATTEMPTS:2}
+    provider-max-retries: ${DRAI_LLM_PROVIDER_MAX_RETRIES:0}
+    log-requests: ${DRAI_LLM_LOG_REQUESTS:false}
+    log-responses: ${DRAI_LLM_LOG_RESPONSES:false}
   embedding:
     model: ${DRAI_EMBEDDING_MODEL:text-embedding-3-small}
   chroma:
