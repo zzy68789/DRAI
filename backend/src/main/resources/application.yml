@@ -47,5 +47,7 @@ drai:
     relevance-threshold: ${DRAI_RAG_RELEVANCE_THRESHOLD:0.2}
   tavily:
     api-key: ${TAVILY_API_KEY:}
+  search:
+    max-attempts: ${DRAI_SEARCH_MAX_ATTEMPTS:2}
   redis:
     runtime-ttl: ${DRAI_REDIS_RUNTIME_TTL:PT24H}

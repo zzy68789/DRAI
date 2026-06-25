@@ -71,6 +71,7 @@ public class ResearcherNode {
 
     private String webEvidence(String query, SearchResult result) {
         return "### WEB evidence (" + query + ")\n"
+                + "- source: " + result.source() + "\n"
                 + "- title: " + result.title() + "\n"
                 + "- url: " + result.url() + "\n"
                 + result.content();

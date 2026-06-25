@@ -240,9 +240,10 @@ $env:DRAI_LLM_LOG_REQUESTS="false"
 $env:DRAI_LLM_LOG_RESPONSES="false"
 $env:DRAI_EMBEDDING_MODEL="text-embedding-3-small"
 $env:TAVILY_API_KEY="your_tavily_key"
+$env:DRAI_SEARCH_MAX_ATTEMPTS="2"
 ```
 
-后端通过 LangChain4j `OpenAiChatModel` 调用 OpenAI-compatible `/chat/completions`，并在外层增加失败重试和本地 fallback。Planner 会优先解析 JSON array，Reviewer 会强制解析 `{"status":"PASS|FAIL","feedback":""}` 结构。未配置 `OPENAI_API_KEY` 时，系统会使用本地降级内容，便于验证完整 Agent 流程；embedding 也会降级为本地 hash 向量，方便开发环境跑通 ChromaDB 写入和查询；未配置 `TAVILY_API_KEY` 时，搜索服务会返回降级结果。
+后端通过 LangChain4j `OpenAiChatModel` 调用 OpenAI-compatible `/chat/completions`，并在外层增加失败重试和本地 fallback。Planner 会优先解析 JSON array，Reviewer 会强制解析 `{"status":"PASS|FAIL","feedback":""}` 结构。未配置 `OPENAI_API_KEY` 时，系统会使用本地降级内容，便于验证完整 Agent 流程；embedding 也会降级为本地 hash 向量，方便开发环境跑通 ChromaDB 写入和查询；搜索服务通过 `SearchSource` 抽象接入 Tavily，并统一做失败重试、去重、质量过滤和本地 fallback，未配置 `TAVILY_API_KEY` 时会返回降级结果。
 
 ## API 说明
 
@@ -319,7 +320,7 @@ Accept: text/event-stream
 字段说明：
 
 - `query`：用户调研问题或报告修改指令。
-- `search_mode`：支持 `hybrid` 和 `document`。
+- `search_mode`：支持 `document`、`hybrid` 和 `web`。
 - `thread_id`：会话 ID，同一 ID 下可触发报告修订。
 
 ## 数据表
