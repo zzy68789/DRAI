@@ -124,8 +124,47 @@ export async function getThreadReports(threadId = SESSION_THREAD_ID) {
   return requestJson(`/threads/${encodeURIComponent(threadId)}/reports`);
 }
 
+export async function listReports({ keyword = '', favoriteOnly = false } = {}) {
+  const params = new URLSearchParams({
+      favoriteOnly: String(Boolean(favoriteOnly))
+  });
+  if (keyword) params.set('keyword', keyword);
+  return requestJson(`/reports?${params.toString()}`);
+}
+
 export async function getReport(reportId) {
   return requestJson(`/reports/${reportId}`);
+}
+
+export async function exportReport(reportId, format = 'pdf') {
+  const response = await fetch(`${API_BASE}/reports/${reportId}/export?format=${encodeURIComponent(format)}`, withAuth());
+  if (!response.ok) {
+      throw new Error(`Export failed: ${response.status}`);
+  }
+  const disposition = response.headers.get('Content-Disposition') || '';
+  const filenameMatch = disposition.match(/filename="?([^"]+)"?/i);
+  return {
+      blob: await response.blob(),
+      filename: filenameMatch ? filenameMatch[1] : `report.${format}`
+  };
+}
+
+export async function updateReportFavorite(reportId, favorite) {
+  return requestJson(`/reports/${reportId}/favorite?favorite=${String(Boolean(favorite))}`, {
+      method: 'POST'
+  });
+}
+
+export async function deleteReport(reportId) {
+  return requestJson(`/reports/${reportId}`, {
+      method: 'DELETE'
+  });
+}
+
+export async function indexReportToKnowledgeBase(reportId) {
+  return requestJson(`/reports/${reportId}/knowledge-base`, {
+      method: 'POST'
+  });
 }
 
 /**

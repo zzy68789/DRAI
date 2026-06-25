@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -51,5 +52,21 @@ class RagServiceTest {
         List<RagDocument> docs = ragService.retrieve("agent", 2);
 
         assertThat(docs).containsExactly(new RagDocument("agent.pdf", "agent content", 0.95));
+    }
+
+    @Test
+    void indexTextAppendsReportChunksWithoutClearingVectorStore() {
+        PdfTextExtractor pdfTextExtractor = mock(PdfTextExtractor.class);
+        VectorDocumentStore vectorDocumentStore = mock(VectorDocumentStore.class);
+        RagService ragService = new RagService(pdfTextExtractor, vectorDocumentStore, new TextChunker(12, 2));
+
+        int stored = ragService.indexText("report-thread-1-v2.md", "agent report content");
+
+        assertThat(stored).isEqualTo(2);
+        verify(vectorDocumentStore).add(eq(List.of(
+                new RagDocumentChunk("report-thread-1-v2.md", 0, "agent report"),
+                new RagDocumentChunk("report-thread-1-v2.md", 1, "rt content")
+        )));
+        verify(vectorDocumentStore, never()).clear();
     }
 }

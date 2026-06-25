@@ -123,6 +123,7 @@ backend/src/main/resources/db/schema.sql
 
 ```text
 backend/src/main/resources/db/upgrade-user-auth.sql
+backend/src/main/resources/db/upgrade-report-library.sql
 ```
 
 ### 2. 启动后端
@@ -370,6 +371,20 @@ mvn package -DskipTests
 cd frontend
 npm.cmd run build
 ```
+
+## Report Library and Export
+
+The report library basic version supports:
+
+- User-scoped report list: `GET /api/reports?keyword=agent&favoriteOnly=false`
+- Thread report versions: `GET /api/threads/{threadId}/reports`
+- Report detail: `GET /api/reports/{reportId}`
+- Export: `GET /api/reports/{reportId}/export?format=pdf|docx|md`
+- Favorite toggle: `POST /api/reports/{reportId}/favorite?favorite=true`
+- Reuse report as RAG context: `POST /api/reports/{reportId}/knowledge-base`
+- Soft delete: `DELETE /api/reports/{reportId}`
+
+For an existing MySQL database, run `backend/src/main/resources/db/upgrade-report-library.sql` once before using favorite, soft delete, and report reuse metadata. New databases created from `backend/src/main/resources/db/schema.sql` already include these columns.
 
 ## 当前边界
 

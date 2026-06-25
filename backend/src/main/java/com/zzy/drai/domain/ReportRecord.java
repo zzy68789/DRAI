@@ -10,6 +10,8 @@ public record ReportRecord(
         int version,
         String reviewStatus,
         String critique,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        boolean favorite,
+        LocalDateTime indexedAt
 ) {
 }

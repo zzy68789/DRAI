@@ -1,8 +1,11 @@
 package com.zzy.drai.service;
 
 import com.zzy.drai.domain.ResearchTaskRecord;
+import com.zzy.drai.domain.ReportRecord;
 import com.zzy.drai.dto.PageResponse;
+import com.zzy.drai.dto.ReportIndexResponse;
 import com.zzy.drai.dto.TaskSummaryResponse;
+import com.zzy.drai.rag.RagService;
 import com.zzy.drai.repository.AgentStepLogRepository;
 import com.zzy.drai.repository.ReportRepository;
 import com.zzy.drai.repository.ResearchTaskRepository;
@@ -24,7 +27,8 @@ class TaskQueryTenantIsolationTest {
         TaskQueryService service = new TaskQueryService(
                 taskRepository,
                 mock(AgentStepLogRepository.class),
-                mock(ReportRepository.class)
+                mock(ReportRepository.class),
+                mock(RagService.class)
         );
         LocalDateTime now = LocalDateTime.now();
         when(taskRepository.findPage(7L, 1, 10, "COMPLETED", "agent"))
@@ -37,5 +41,40 @@ class TaskQueryTenantIsolationTest {
         assertThat(page.items()).singleElement().extracting(TaskSummaryResponse::threadId).isEqualTo("thread-1");
         verify(taskRepository).findPage(7L, 1, 10, "COMPLETED", "agent");
         verify(taskRepository).count(7L, "COMPLETED", "agent");
+    }
+
+    @Test
+    void indexReportToKnowledgeBaseUsesOwnerScopedReport() {
+        ResearchTaskRepository taskRepository = mock(ResearchTaskRepository.class);
+        ReportRepository reportRepository = mock(ReportRepository.class);
+        RagService ragService = mock(RagService.class);
+        TaskQueryService service = new TaskQueryService(
+                taskRepository,
+                mock(AgentStepLogRepository.class),
+                reportRepository,
+                ragService
+        );
+        LocalDateTime now = LocalDateTime.now();
+        ReportRecord report = new ReportRecord(
+                21L,
+                1L,
+                "thread-1",
+                "# Report\nRAG reusable content",
+                2,
+                "PASS",
+                "",
+                now,
+                false,
+                null
+        );
+        when(reportRepository.findReportById(7L, 21L)).thenReturn(java.util.Optional.of(report));
+        when(ragService.indexText("report-thread-1-v2.md", "# Report\nRAG reusable content")).thenReturn(2);
+
+        ReportIndexResponse response = service.indexReportToKnowledgeBase(7L, 21L);
+
+        assertThat(response.reportId()).isEqualTo(21L);
+        assertThat(response.chunksStored()).isEqualTo(2);
+        verify(reportRepository).findReportById(7L, 21L);
+        verify(reportRepository).markIndexed(7L, 21L);
     }
 }

@@ -44,9 +44,14 @@ CREATE TABLE IF NOT EXISTS report (
   version INT NOT NULL DEFAULT 1,
   review_status VARCHAR(32),
   critique LONGTEXT,
+  favorite TINYINT(1) NOT NULL DEFAULT 0,
+  indexed_at DATETIME,
+  deleted_at DATETIME,
   created_at DATETIME NOT NULL,
   INDEX idx_report_owner_id (owner_id),
-  INDEX idx_report_thread_id (thread_id)
+  INDEX idx_report_thread_id (thread_id),
+  INDEX idx_report_favorite (favorite),
+  INDEX idx_report_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS checkpoint (

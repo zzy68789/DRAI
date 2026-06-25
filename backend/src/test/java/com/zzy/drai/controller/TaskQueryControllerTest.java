@@ -6,8 +6,11 @@ import com.zzy.drai.dto.ApiResponse;
 import com.zzy.drai.dto.AgentStepLogResponse;
 import com.zzy.drai.dto.PageResponse;
 import com.zzy.drai.dto.ReportResponse;
+import com.zzy.drai.dto.ReportIndexResponse;
 import com.zzy.drai.dto.TaskDetailResponse;
 import com.zzy.drai.dto.TaskSummaryResponse;
+import com.zzy.drai.service.ExportedReport;
+import com.zzy.drai.service.ReportExportService;
 import com.zzy.drai.service.TaskQueryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +23,10 @@ import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(value = TaskQueryController.class, properties = "drai.auth.enabled=false")
@@ -31,6 +37,9 @@ class TaskQueryControllerTest {
 
     @MockitoBean
     TaskQueryService taskQueryService;
+
+    @MockitoBean
+    ReportExportService reportExportService;
 
     @MockitoBean
     UserContext userContext;
@@ -92,7 +101,7 @@ class TaskQueryControllerTest {
     @Test
     void getThreadReportsReturnsReportVersions() throws Exception {
         LocalDateTime now = LocalDateTime.of(2026, 6, 24, 10, 0);
-        ReportResponse report = new ReportResponse(21L, 1L, "thread-1", "report", 1, "PASS", "", now);
+        ReportResponse report = new ReportResponse(21L, 1L, "thread-1", "report", 1, "PASS", "", now, false, null);
         when(userContext.currentUserId()).thenReturn(7L);
         when(taskQueryService.getThreadReports(7L, "thread-1")).thenReturn(List.of(report));
 
@@ -108,12 +117,78 @@ class TaskQueryControllerTest {
         LocalDateTime now = LocalDateTime.of(2026, 6, 24, 10, 0);
         when(userContext.currentUserId()).thenReturn(7L);
         when(taskQueryService.getReport(7L, 21L))
-                .thenReturn(new ReportResponse(21L, 1L, "thread-1", "report", 1, "PASS", "", now));
+                .thenReturn(new ReportResponse(21L, 1L, "thread-1", "report", 1, "PASS", "", now, false, null));
 
         mockMvc.perform(get("/api/reports/21"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(0))
                 .andExpect(jsonPath("$.data.id").value(21))
                 .andExpect(jsonPath("$.data.content").value("report"));
+    }
+
+    @Test
+    void listReportsReturnsReportLibrary() throws Exception {
+        LocalDateTime now = LocalDateTime.of(2026, 6, 24, 10, 0);
+        when(userContext.currentUserId()).thenReturn(7L);
+        when(taskQueryService.listReports(7L, "agent", true))
+                .thenReturn(List.of(new ReportResponse(21L, 1L, "thread-1", "report", 1, "PASS", "", now, true, null)));
+
+        mockMvc.perform(get("/api/reports")
+                        .param("keyword", "agent")
+                        .param("favoriteOnly", "true"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data[0].favorite").value(true));
+    }
+
+    @Test
+    void exportReportReturnsDownloadableFile() throws Exception {
+        ReportResponse report = new ReportResponse(21L, 1L, "thread-1", "# Report", 1, "PASS", "", LocalDateTime.now(), false, null);
+        ExportedReport exported = new ExportedReport(
+                "report-thread-1-v1.pdf",
+                "application/pdf",
+                "%PDF".getBytes()
+        );
+        when(userContext.currentUserId()).thenReturn(7L);
+        when(taskQueryService.getReport(7L, 21L)).thenReturn(report);
+        when(reportExportService.export(report, "pdf")).thenReturn(exported);
+
+        mockMvc.perform(get("/api/reports/21/export").param("format", "pdf"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", "application/pdf"))
+                .andExpect(header().string("Content-Disposition", "attachment; filename=\"report-thread-1-v1.pdf\""));
+    }
+
+    @Test
+    void updateFavoriteUsesCurrentUser() throws Exception {
+        LocalDateTime now = LocalDateTime.of(2026, 6, 24, 10, 0);
+        when(userContext.currentUserId()).thenReturn(7L);
+        when(taskQueryService.updateFavorite(7L, 21L, true))
+                .thenReturn(new ReportResponse(21L, 1L, "thread-1", "report", 1, "PASS", "", now, true, null));
+
+        mockMvc.perform(post("/api/reports/21/favorite").param("favorite", "true"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.favorite").value(true));
+    }
+
+    @Test
+    void deleteReportUsesCurrentUser() throws Exception {
+        when(userContext.currentUserId()).thenReturn(7L);
+
+        mockMvc.perform(delete("/api/reports/21"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0));
+    }
+
+    @Test
+    void indexReportUsesCurrentUser() throws Exception {
+        when(userContext.currentUserId()).thenReturn(7L);
+        when(taskQueryService.indexReportToKnowledgeBase(7L, 21L))
+                .thenReturn(new ReportIndexResponse(21L, 2, "indexed"));
+
+        mockMvc.perform(post("/api/reports/21/knowledge-base"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.reportId").value(21))
+                .andExpect(jsonPath("$.data.chunksStored").value(2));
     }
 }

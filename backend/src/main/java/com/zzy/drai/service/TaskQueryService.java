@@ -5,9 +5,11 @@ import com.zzy.drai.domain.ReportRecord;
 import com.zzy.drai.domain.ResearchTaskRecord;
 import com.zzy.drai.dto.AgentStepLogResponse;
 import com.zzy.drai.dto.PageResponse;
+import com.zzy.drai.dto.ReportIndexResponse;
 import com.zzy.drai.dto.ReportResponse;
 import com.zzy.drai.dto.TaskDetailResponse;
 import com.zzy.drai.dto.TaskSummaryResponse;
+import com.zzy.drai.rag.RagService;
 import com.zzy.drai.repository.AgentStepLogRepository;
 import com.zzy.drai.repository.ReportRepository;
 import com.zzy.drai.repository.ResearchTaskRepository;
@@ -22,15 +24,18 @@ public class TaskQueryService {
     private final ResearchTaskRepository taskRepository;
     private final AgentStepLogRepository stepLogRepository;
     private final ReportRepository reportRepository;
+    private final RagService ragService;
 
     public TaskQueryService(
             ResearchTaskRepository taskRepository,
             AgentStepLogRepository stepLogRepository,
-            ReportRepository reportRepository
+            ReportRepository reportRepository,
+            RagService ragService
     ) {
         this.taskRepository = taskRepository;
         this.stepLogRepository = stepLogRepository;
         this.reportRepository = reportRepository;
+        this.ragService = ragService;
     }
 
     public PageResponse<TaskSummaryResponse> listTasks(long ownerId, int page, int size, String status, String keyword) {
@@ -47,7 +52,7 @@ public class TaskQueryService {
     public TaskDetailResponse getTask(long ownerId, long taskId) {
         return taskRepository.findById(ownerId, taskId)
                 .map(this::toDetail)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "任务不存在"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
     }
 
     public List<AgentStepLogResponse> getTaskLogs(long ownerId, long taskId) {
@@ -63,10 +68,35 @@ public class TaskQueryService {
                 .toList();
     }
 
+    public List<ReportResponse> listReports(long ownerId, String keyword, boolean favoriteOnly) {
+        return reportRepository.findReports(ownerId, normalize(keyword), favoriteOnly).stream()
+                .map(this::toReport)
+                .toList();
+    }
+
     public ReportResponse getReport(long ownerId, long reportId) {
         return reportRepository.findReportById(ownerId, reportId)
                 .map(this::toReport)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "报告不存在"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found"));
+    }
+
+    public ReportResponse updateFavorite(long ownerId, long reportId, boolean favorite) {
+        getReport(ownerId, reportId);
+        reportRepository.updateFavorite(ownerId, reportId, favorite);
+        return getReport(ownerId, reportId);
+    }
+
+    public void deleteReport(long ownerId, long reportId) {
+        getReport(ownerId, reportId);
+        reportRepository.softDelete(ownerId, reportId);
+    }
+
+    public ReportIndexResponse indexReportToKnowledgeBase(long ownerId, long reportId) {
+        ReportRecord report = reportRepository.findReportById(ownerId, reportId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found"));
+        int chunksStored = ragService.indexText(reportSource(report), report.content());
+        reportRepository.markIndexed(ownerId, reportId);
+        return new ReportIndexResponse(reportId, chunksStored, "indexed");
     }
 
     private TaskSummaryResponse toSummary(ResearchTaskRecord task) {
@@ -117,8 +147,14 @@ public class TaskQueryService {
                 report.version(),
                 report.reviewStatus(),
                 report.critique(),
-                report.createdAt()
+                report.createdAt(),
+                report.favorite(),
+                report.indexedAt()
         );
+    }
+
+    private String reportSource(ReportRecord report) {
+        return "report-%s-v%d.md".formatted(report.threadId(), report.version());
     }
 
     private String normalize(String value) {

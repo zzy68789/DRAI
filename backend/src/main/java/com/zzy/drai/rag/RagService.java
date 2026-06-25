@@ -50,6 +50,20 @@ public class RagService {
         return hybridRagRetriever.retrieve(query, topK);
     }
 
+    public int indexText(String source, String text) {
+        if (text == null || text.isBlank()) {
+            return 0;
+        }
+        List<String> rawChunks = textChunker.chunk(text);
+        List<RagDocumentChunk> chunks = new ArrayList<>(rawChunks.size());
+        String normalizedSource = source == null || source.isBlank() ? "report.md" : source;
+        for (int i = 0; i < rawChunks.size(); i++) {
+            chunks.add(new RagDocumentChunk(normalizedSource, i, rawChunks.get(i)));
+        }
+        hybridRagRetriever.index(chunks);
+        return chunks.size();
+    }
+
     public void clear() {
         hybridRagRetriever.clear();
     }
