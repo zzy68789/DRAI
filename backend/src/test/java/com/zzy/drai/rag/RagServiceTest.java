@@ -8,6 +8,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -44,7 +45,7 @@ class RagServiceTest {
         PdfTextExtractor pdfTextExtractor = mock(PdfTextExtractor.class);
         VectorDocumentStore vectorDocumentStore = mock(VectorDocumentStore.class);
         RagService ragService = new RagService(pdfTextExtractor, vectorDocumentStore, new TextChunker(12, 2));
-        when(vectorDocumentStore.query("agent", 2))
+        when(vectorDocumentStore.query(eq("agent"), anyInt()))
                 .thenReturn(List.of(new RagDocument("agent.pdf", "agent content", 0.95)));
 
         List<RagDocument> docs = ragService.retrieve("agent", 2);

@@ -12,17 +12,21 @@ import java.util.Locale;
 @Service
 public class RagService {
     private final PdfTextExtractor pdfTextExtractor;
-    private final VectorDocumentStore vectorDocumentStore;
+    private final HybridRagRetriever hybridRagRetriever;
     private final TextChunker textChunker;
 
     @Autowired
-    public RagService(PdfTextExtractor pdfTextExtractor, VectorDocumentStore vectorDocumentStore) {
-        this(pdfTextExtractor, vectorDocumentStore, new TextChunker(500, 50));
+    public RagService(PdfTextExtractor pdfTextExtractor, HybridRagRetriever hybridRagRetriever) {
+        this(pdfTextExtractor, hybridRagRetriever, new TextChunker(500, 50));
     }
 
     RagService(PdfTextExtractor pdfTextExtractor, VectorDocumentStore vectorDocumentStore, TextChunker textChunker) {
+        this(pdfTextExtractor, new HybridRagRetriever(vectorDocumentStore, 0.2), textChunker);
+    }
+
+    RagService(PdfTextExtractor pdfTextExtractor, HybridRagRetriever hybridRagRetriever, TextChunker textChunker) {
         this.pdfTextExtractor = pdfTextExtractor;
-        this.vectorDocumentStore = vectorDocumentStore;
+        this.hybridRagRetriever = hybridRagRetriever;
         this.textChunker = textChunker;
     }
 
@@ -35,7 +39,7 @@ public class RagService {
             chunks.addAll(fileChunks);
             stored += fileChunks.size();
         }
-        vectorDocumentStore.add(chunks);
+        hybridRagRetriever.index(chunks);
         return stored;
     }
 
@@ -43,11 +47,11 @@ public class RagService {
         if (query == null || query.isBlank()) {
             return List.of();
         }
-        return vectorDocumentStore.query(query, topK);
+        return hybridRagRetriever.retrieve(query, topK);
     }
 
     public void clear() {
-        vectorDocumentStore.clear();
+        hybridRagRetriever.clear();
     }
 
     private List<RagDocumentChunk> processOne(MultipartFile file) {
@@ -55,7 +59,7 @@ public class RagService {
             return List.of();
         }
         if (file.getOriginalFilename() == null || !file.getOriginalFilename().toLowerCase(Locale.ROOT).endsWith(".pdf")) {
-            throw new IllegalArgumentException("MVP 仅支持 PDF 文件");
+            throw new IllegalArgumentException("MVP only supports PDF files");
         }
         try {
             String text = pdfTextExtractor.extract(file.getBytes());
@@ -66,7 +70,7 @@ public class RagService {
             }
             return chunks;
         } catch (IOException e) {
-            throw new IllegalArgumentException("读取上传文件失败: " + e.getMessage(), e);
+            throw new IllegalArgumentException("Failed to read uploaded file: " + e.getMessage(), e);
         }
     }
 }

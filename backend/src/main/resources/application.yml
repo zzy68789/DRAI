@@ -38,6 +38,8 @@ drai:
     database: ${DRAI_CHROMA_DATABASE:default_database}
     collection: ${DRAI_CHROMA_COLLECTION:drai_docs}
     token: ${DRAI_CHROMA_TOKEN:}
+  rag:
+    relevance-threshold: ${DRAI_RAG_RELEVANCE_THRESHOLD:0.2}
   tavily:
     api-key: ${TAVILY_API_KEY:}
   redis:
