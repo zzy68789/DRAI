@@ -12,6 +12,7 @@ public class ResearchState extends AgentState {
     public static final String QUERY = "query";
     public static final String SEARCH_MODE = "searchMode";
     public static final String PLAN = "plan";
+    public static final String SUB_TASK_RESULTS = "subTaskResults";
     public static final String SEARCH_RESULTS = "searchResults";
     public static final String FINAL_REPORT = "finalReport";
     public static final String CRITIQUE = "critique";
@@ -61,6 +62,11 @@ public class ResearchState extends AgentState {
     @SuppressWarnings("unchecked")
     public List<String> searchResults() {
         return value(SEARCH_RESULTS).map(value -> (List<String>) value).orElseGet(List::of);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<AgentSubTaskResult> subTaskResults() {
+        return value(SUB_TASK_RESULTS).map(value -> (List<AgentSubTaskResult>) value).orElseGet(List::of);
     }
 
     public Optional<String> finalReport() {

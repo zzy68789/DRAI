@@ -47,6 +47,12 @@ public final class PromptTemplates {
                 """.formatted(query, report);
     }
 
+    public static String reviewer(String query, String report, List<String> evidence) {
+        return reviewer(query, report)
+                + "\n检索证据：\n"
+                + String.join("\n\n", evidence);
+    }
+
     public static String refine(String oldReport, String instruction) {
         return """
                 你是报告编辑。请根据用户修改指令改写旧报告，保持 Markdown 结构，直接输出完整新版本报告。

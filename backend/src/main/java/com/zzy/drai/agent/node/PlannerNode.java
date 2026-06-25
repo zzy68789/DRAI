@@ -1,5 +1,6 @@
 package com.zzy.drai.agent.node;
 
+import com.zzy.drai.agent.state.AgentSubTaskResult;
 import com.zzy.drai.agent.state.ResearchState;
 import com.zzy.drai.llm.LlmClient;
 import com.zzy.drai.llm.PlanParser;
@@ -22,6 +23,12 @@ public class PlannerNode {
     public Map<String, Object> apply(ResearchState state) {
         String raw = llmClient.generate(PromptTemplates.planner(state.query(), state.critique()), LlmClient.ModelType.FAST);
         List<String> plan = planParser.parse(raw, state.query());
-        return Map.of(ResearchState.PLAN, plan);
+        List<AgentSubTaskResult> subTasks = plan.stream()
+                .map(query -> new AgentSubTaskResult(query, "PENDING", List.of(), 0, 0, ""))
+                .toList();
+        return Map.of(
+                ResearchState.PLAN, plan,
+                ResearchState.SUB_TASK_RESULTS, subTasks
+        );
     }
 }
