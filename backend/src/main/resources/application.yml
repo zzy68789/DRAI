@@ -30,6 +30,14 @@ drai:
     api-key: ${OPENAI_API_KEY:}
     fast-model: ${DRAI_LLM_FAST_MODEL:qwen3-max}
     smart-model: ${DRAI_LLM_SMART_MODEL:deepseek-r1}
+  embedding:
+    model: ${DRAI_EMBEDDING_MODEL:text-embedding-3-small}
+  chroma:
+    base-url: ${DRAI_CHROMA_BASE_URL:http://localhost:8000}
+    tenant: ${DRAI_CHROMA_TENANT:default_tenant}
+    database: ${DRAI_CHROMA_DATABASE:default_database}
+    collection: ${DRAI_CHROMA_COLLECTION:drai_docs}
+    token: ${DRAI_CHROMA_TOKEN:}
   tavily:
     api-key: ${TAVILY_API_KEY:}
   redis:
