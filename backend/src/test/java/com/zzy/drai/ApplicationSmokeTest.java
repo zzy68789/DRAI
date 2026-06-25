@@ -1,7 +1,10 @@
 package com.zzy.drai;
 
+import com.zzy.drai.auth.AuthService;
+import com.zzy.drai.auth.UserContext;
 import com.zzy.drai.dto.ClearResponse;
 import com.zzy.drai.repository.AgentStepLogRepository;
+import com.zzy.drai.repository.AppUserRepository;
 import com.zzy.drai.repository.CheckpointRepository;
 import com.zzy.drai.repository.ReportRepository;
 import com.zzy.drai.repository.ResearchTaskRepository;
@@ -26,7 +29,10 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,org.springframework.boot.autoconfigure.sql.init.SqlInitializationAutoConfiguration"
+        properties = {
+                "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,org.springframework.boot.autoconfigure.sql.init.SqlInitializationAutoConfiguration",
+                "drai.auth.enabled=false"
+        }
 )
 class ApplicationSmokeTest {
 
@@ -48,10 +54,20 @@ class ApplicationSmokeTest {
     @MockitoBean
     ReportRepository reportRepository;
 
+    @MockitoBean
+    UserContext userContext;
+
+    @MockitoBean
+    AuthService authService;
+
+    @MockitoBean
+    AppUserRepository appUserRepository;
+
     @BeforeEach
     void setUp() {
-        when(taskRepository.create(anyString(), anyString(), anyString())).thenReturn(1L);
-        when(reportRepository.findLatestByThread(anyString())).thenReturn(Optional.empty());
+        when(userContext.currentUserId()).thenReturn(7L);
+        when(taskRepository.create(org.mockito.ArgumentMatchers.eq(7L), anyString(), anyString(), anyString())).thenReturn(1L);
+        when(reportRepository.findLatestByThread(org.mockito.ArgumentMatchers.eq(7L), anyString())).thenReturn(Optional.empty());
     }
 
     @Test

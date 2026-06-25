@@ -41,15 +41,16 @@ public class ResearchTaskService {
         this.runtimeStateService = runtimeStateService;
     }
 
-    public void run(ChatRequest request, SseEmitter emitter) {
+    public void run(long ownerId, ChatRequest request, SseEmitter emitter) {
         executorService.submit(() -> {
-            long taskId = taskRepository.create(request.getThreadId(), request.getQuery(), request.getSearchMode());
+            long taskId = taskRepository.create(ownerId, request.getThreadId(), request.getQuery(), request.getSearchMode());
             runtimeStateService.taskCreated(taskId, request.getThreadId());
             try {
                 taskRepository.markRunning(taskId);
                 runtimeStateService.markStatus(taskId, "RUNNING");
                 Map<String, Object> initialState = Map.of(
                         ResearchState.TASK_ID, taskId,
+                        ResearchState.OWNER_ID, ownerId,
                         ResearchState.THREAD_ID, request.getThreadId(),
                         ResearchState.QUERY, request.getQuery(),
                         ResearchState.SEARCH_MODE, request.getSearchMode(),

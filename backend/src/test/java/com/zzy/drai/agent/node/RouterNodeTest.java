@@ -12,7 +12,7 @@ class RouterNodeTest {
 
     @Test
     void routesToPlannerWhenThreadHasNoPreviousReport() {
-        RouterNode router = new RouterNode(threadId -> Optional.empty());
+        RouterNode router = new RouterNode((ownerId, threadId) -> Optional.empty());
 
         String route = router.route(new ResearchState(Map.of(
                 ResearchState.THREAD_ID, "thread-1",
@@ -24,7 +24,7 @@ class RouterNodeTest {
 
     @Test
     void routesToRefinerWhenPreviousReportExistsAndQueryLooksLikeRevision() {
-        RouterNode router = new RouterNode(threadId -> Optional.of("# 旧报告"));
+        RouterNode router = new RouterNode((ownerId, threadId) -> Optional.of("# 旧报告"));
 
         String route = router.route(new ResearchState(Map.of(
                 ResearchState.THREAD_ID, "thread-1",

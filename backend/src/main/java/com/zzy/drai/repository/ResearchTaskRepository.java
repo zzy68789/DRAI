@@ -36,20 +36,21 @@ public class ResearchTaskRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public long create(String threadId, String query, String searchMode) {
+    public long create(long ownerId, String threadId, String query, String searchMode) {
         LocalDateTime now = LocalDateTime.now();
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement statement = connection.prepareStatement("""
-                    INSERT INTO research_task(thread_id, query, search_mode, status, revision_number, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, 0, ?, ?)
+                    INSERT INTO research_task(owner_id, thread_id, query, search_mode, status, revision_number, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, 0, ?, ?)
                     """, Statement.RETURN_GENERATED_KEYS);
-            statement.setString(1, threadId);
-            statement.setString(2, query);
-            statement.setString(3, searchMode);
-            statement.setString(4, "CREATED");
-            statement.setObject(5, now);
+            statement.setLong(1, ownerId);
+            statement.setString(2, threadId);
+            statement.setString(3, query);
+            statement.setString(4, searchMode);
+            statement.setString(5, "CREATED");
             statement.setObject(6, now);
+            statement.setObject(7, now);
             return statement;
         }, keyHolder);
         Number key = keyHolder.getKey();
@@ -79,8 +80,8 @@ public class ResearchTaskRepository {
                 .update();
     }
 
-    public List<ResearchTaskRecord> findPage(int page, int size, String status, String keyword) {
-        QueryParts queryParts = buildFilter(status, keyword);
+    public List<ResearchTaskRecord> findPage(long ownerId, int page, int size, String status, String keyword) {
+        QueryParts queryParts = buildFilter(ownerId, status, keyword);
         List<Object> params = new ArrayList<>(queryParts.params());
         params.add(size);
         params.add((page - 1) * size);
@@ -96,8 +97,8 @@ public class ResearchTaskRepository {
         );
     }
 
-    public long count(String status, String keyword) {
-        QueryParts queryParts = buildFilter(status, keyword);
+    public long count(long ownerId, String status, String keyword) {
+        QueryParts queryParts = buildFilter(ownerId, status, keyword);
         Long count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM research_task " + queryParts.whereClause(),
                 Long.class,
@@ -106,20 +107,21 @@ public class ResearchTaskRepository {
         return count == null ? 0L : count;
     }
 
-    public Optional<ResearchTaskRecord> findById(long taskId) {
+    public Optional<ResearchTaskRecord> findById(long ownerId, long taskId) {
         return jdbcTemplate.query("""
                         SELECT id, thread_id, query, search_mode, status, revision_number, created_at, updated_at
                         FROM research_task
-                        WHERE id = ?
+                        WHERE owner_id = ? AND id = ?
                         """,
                 TASK_MAPPER,
+                ownerId,
                 taskId
         ).stream().findFirst();
     }
 
-    private QueryParts buildFilter(String status, String keyword) {
-        List<String> conditions = new ArrayList<>();
-        List<Object> params = new ArrayList<>();
+    private QueryParts buildFilter(long ownerId, String status, String keyword) {
+        List<String> conditions = new ArrayList<>(List.of("owner_id = ?"));
+        List<Object> params = new ArrayList<>(List.of(ownerId));
         if (status != null && !status.isBlank()) {
             conditions.add("status = ?");
             params.add(status);

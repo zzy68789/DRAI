@@ -1,5 +1,6 @@
 package com.zzy.drai.controller;
 
+import com.zzy.drai.auth.UserContext;
 import com.zzy.drai.dto.AgentStepLogResponse;
 import com.zzy.drai.dto.ApiResponse;
 import com.zzy.drai.dto.PageResponse;
@@ -19,9 +20,11 @@ import java.util.List;
 @RequestMapping("/api")
 public class TaskQueryController {
     private final TaskQueryService taskQueryService;
+    private final UserContext userContext;
 
-    public TaskQueryController(TaskQueryService taskQueryService) {
+    public TaskQueryController(TaskQueryService taskQueryService, UserContext userContext) {
         this.taskQueryService = taskQueryService;
+        this.userContext = userContext;
     }
 
     @GetMapping("/tasks")
@@ -31,26 +34,26 @@ public class TaskQueryController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String keyword
     ) {
-        return ApiResponse.success(taskQueryService.listTasks(page, size, status, keyword));
+        return ApiResponse.success(taskQueryService.listTasks(userContext.currentUserId(), page, size, status, keyword));
     }
 
     @GetMapping("/tasks/{taskId}")
     public ApiResponse<TaskDetailResponse> getTask(@PathVariable long taskId) {
-        return ApiResponse.success(taskQueryService.getTask(taskId));
+        return ApiResponse.success(taskQueryService.getTask(userContext.currentUserId(), taskId));
     }
 
     @GetMapping("/tasks/{taskId}/logs")
     public ApiResponse<List<AgentStepLogResponse>> getTaskLogs(@PathVariable long taskId) {
-        return ApiResponse.success(taskQueryService.getTaskLogs(taskId));
+        return ApiResponse.success(taskQueryService.getTaskLogs(userContext.currentUserId(), taskId));
     }
 
     @GetMapping("/threads/{threadId}/reports")
     public ApiResponse<List<ReportResponse>> getThreadReports(@PathVariable String threadId) {
-        return ApiResponse.success(taskQueryService.getThreadReports(threadId));
+        return ApiResponse.success(taskQueryService.getThreadReports(userContext.currentUserId(), threadId));
     }
 
     @GetMapping("/reports/{reportId}")
     public ApiResponse<ReportResponse> getReport(@PathVariable long reportId) {
-        return ApiResponse.success(taskQueryService.getReport(reportId));
+        return ApiResponse.success(taskQueryService.getReport(userContext.currentUserId(), reportId));
     }
 }

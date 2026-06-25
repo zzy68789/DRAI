@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public class ResearchState extends AgentState {
     public static final String THREAD_ID = "threadId";
+    public static final String OWNER_ID = "ownerId";
     public static final String TASK_ID = "taskId";
     public static final String QUERY = "query";
     public static final String SEARCH_MODE = "searchMode";
@@ -26,6 +27,12 @@ public class ResearchState extends AgentState {
 
     public String threadId() {
         return stringValue(THREAD_ID).orElse("");
+    }
+
+    public long ownerId() {
+        return value(OWNER_ID)
+                .map(value -> value instanceof Number number ? number.longValue() : Long.parseLong(value.toString()))
+                .orElse(0L);
     }
 
     public String query() {

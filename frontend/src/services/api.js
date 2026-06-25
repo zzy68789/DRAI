@@ -1,6 +1,7 @@
 // frontend/src/services/api.js
 
 const API_BASE = "http://localhost:8000/api";
+let authToken = localStorage.getItem('drai_token') || '';
 
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -15,7 +16,7 @@ const SESSION_THREAD_ID = generateUUID();
 export const currentThreadId = SESSION_THREAD_ID;
 
 async function requestJson(path, options = {}) {
-  const response = await fetch(`${API_BASE}${path}`, options);
+  const response = await fetch(`${API_BASE}${path}`, withAuth(options));
   if (!response.ok) {
       throw new Error(`Request failed: ${response.status}`);
   }
@@ -27,6 +28,47 @@ async function requestJson(path, options = {}) {
       return payload.data;
   }
   return payload;
+}
+
+function withAuth(options = {}) {
+  const headers = new Headers(options.headers || {});
+  if (authToken) {
+      headers.set('Authorization', `Bearer ${authToken}`);
+  }
+  return { ...options, headers };
+}
+
+export function setAuthToken(token) {
+  authToken = token || '';
+  if (authToken) {
+      localStorage.setItem('drai_token', authToken);
+  } else {
+      localStorage.removeItem('drai_token');
+  }
+}
+
+export async function login(username, password) {
+  const data = await requestJson('/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+  });
+  setAuthToken(data.token);
+  return data;
+}
+
+export async function register(username, email, password) {
+  const data = await requestJson('/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, email, password })
+  });
+  setAuthToken(data.token);
+  return data;
+}
+
+export async function getCurrentUser() {
+  return requestJson('/auth/me');
 }
 /**
  * 批量上传文件
@@ -40,10 +82,10 @@ export async function uploadFiles(files) {
     });
 
     // 发送 POST 请求到 /upload
-    const response = await fetch(`${API_BASE}/upload`, {
+    const response = await fetch(`${API_BASE}/upload`, withAuth({
         method: "POST",
         body: formData
-    });
+    }));
     
     if (!response.ok) {
         const errorData = await response.json();
@@ -53,9 +95,9 @@ export async function uploadFiles(files) {
     return await response.json();
 }
 export async function clearContext() {
-  const response = await fetch(`${API_BASE}/clear`, {
+  const response = await fetch(`${API_BASE}/clear`, withAuth({
       method: "POST"
-  });
+  }));
   if (!response.ok) throw new Error("Failed to clear context");
   return await response.json();
 }
@@ -96,7 +138,7 @@ export async function getReport(reportId) {
  */
 export async function streamChat(query, search_mode, onData, onDone, onError, threadId = SESSION_THREAD_ID) {
   try {
-      const response = await fetch(`${API_BASE}/chat`, {
+      const response = await fetch(`${API_BASE}/chat`, withAuth({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
@@ -104,7 +146,7 @@ export async function streamChat(query, search_mode, onData, onDone, onError, th
               search_mode: search_mode,  // 严格使用 search_mode
               thread_id: threadId
           }),
-      });
+      }));
       
       if (!response.ok) throw new Error('Network error');
 

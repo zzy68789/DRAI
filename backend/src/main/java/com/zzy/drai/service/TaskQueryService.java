@@ -33,38 +33,38 @@ public class TaskQueryService {
         this.reportRepository = reportRepository;
     }
 
-    public PageResponse<TaskSummaryResponse> listTasks(int page, int size, String status, String keyword) {
+    public PageResponse<TaskSummaryResponse> listTasks(long ownerId, int page, int size, String status, String keyword) {
         int normalizedPage = Math.max(page, 1);
         int normalizedSize = Math.min(Math.max(size, 1), 100);
-        List<TaskSummaryResponse> items = taskRepository.findPage(normalizedPage, normalizedSize, normalize(status), normalize(keyword))
+        List<TaskSummaryResponse> items = taskRepository.findPage(ownerId, normalizedPage, normalizedSize, normalize(status), normalize(keyword))
                 .stream()
                 .map(this::toSummary)
                 .toList();
-        long total = taskRepository.count(normalize(status), normalize(keyword));
+        long total = taskRepository.count(ownerId, normalize(status), normalize(keyword));
         return new PageResponse<>(items, normalizedPage, normalizedSize, total);
     }
 
-    public TaskDetailResponse getTask(long taskId) {
-        return taskRepository.findById(taskId)
+    public TaskDetailResponse getTask(long ownerId, long taskId) {
+        return taskRepository.findById(ownerId, taskId)
                 .map(this::toDetail)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "任务不存在"));
     }
 
-    public List<AgentStepLogResponse> getTaskLogs(long taskId) {
-        getTask(taskId);
+    public List<AgentStepLogResponse> getTaskLogs(long ownerId, long taskId) {
+        getTask(ownerId, taskId);
         return stepLogRepository.findByTaskId(taskId).stream()
                 .map(this::toStepLog)
                 .toList();
     }
 
-    public List<ReportResponse> getThreadReports(String threadId) {
-        return reportRepository.findReportsByThread(threadId).stream()
+    public List<ReportResponse> getThreadReports(long ownerId, String threadId) {
+        return reportRepository.findReportsByThread(ownerId, threadId).stream()
                 .map(this::toReport)
                 .toList();
     }
 
-    public ReportResponse getReport(long reportId) {
-        return reportRepository.findReportById(reportId)
+    public ReportResponse getReport(long ownerId, long reportId) {
+        return reportRepository.findReportById(ownerId, reportId)
                 .map(this::toReport)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "报告不存在"));
     }

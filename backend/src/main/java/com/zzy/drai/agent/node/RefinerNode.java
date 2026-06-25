@@ -19,9 +19,9 @@ public class RefinerNode {
     }
 
     public Map<String, Object> apply(ResearchState state) {
-        String oldReport = reportService.findLatestByThread(state.threadId()).orElse("");
+        String oldReport = reportService.findLatestByThread(state.ownerId(), state.threadId()).orElse("");
         String newReport = llmClient.generate(PromptTemplates.refine(oldReport, state.query()), LlmClient.ModelType.FAST);
-        reportService.saveLatest(state.threadId(), taskId(state), newReport, "PASS", "");
+        reportService.saveLatest(state.ownerId(), state.threadId(), taskId(state), newReport, "PASS", "");
         return Map.of(
                 ResearchState.FINAL_REPORT, newReport,
                 ResearchState.REVIEW_STATUS, "PASS"

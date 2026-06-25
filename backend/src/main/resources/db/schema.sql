@@ -1,5 +1,17 @@
+CREATE TABLE IF NOT EXISTS app_user (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(64) NOT NULL,
+  email VARCHAR(128),
+  password_hash VARCHAR(255) NOT NULL,
+  role VARCHAR(32) NOT NULL DEFAULT 'USER',
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  UNIQUE KEY uk_app_user_username (username)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS research_task (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  owner_id BIGINT NOT NULL DEFAULT 0,
   thread_id VARCHAR(64) NOT NULL,
   query LONGTEXT NOT NULL,
   search_mode VARCHAR(32) NOT NULL,
@@ -7,6 +19,7 @@ CREATE TABLE IF NOT EXISTS research_task (
   revision_number INT NOT NULL DEFAULT 0,
   created_at DATETIME NOT NULL,
   updated_at DATETIME NOT NULL,
+  INDEX idx_research_task_owner_id (owner_id),
   INDEX idx_research_task_thread_id (thread_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -24,6 +37,7 @@ CREATE TABLE IF NOT EXISTS agent_step_log (
 
 CREATE TABLE IF NOT EXISTS report (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  owner_id BIGINT NOT NULL DEFAULT 0,
   task_id BIGINT,
   thread_id VARCHAR(64) NOT NULL,
   content LONGTEXT NOT NULL,
@@ -31,6 +45,7 @@ CREATE TABLE IF NOT EXISTS report (
   review_status VARCHAR(32),
   critique LONGTEXT,
   created_at DATETIME NOT NULL,
+  INDEX idx_report_owner_id (owner_id),
   INDEX idx_report_thread_id (thread_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

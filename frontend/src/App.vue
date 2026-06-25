@@ -37,7 +37,7 @@
         </div>
 
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <nav class="flex rounded-lg border border-slate-200 bg-slate-50 p-1" aria-label="Workspace">
+          <nav v-if="authUser" class="flex rounded-lg border border-slate-200 bg-slate-50 p-1" aria-label="Workspace">
             <button
               v-for="tab in workspaceTabs"
               :key="tab.id"
@@ -56,11 +56,52 @@
             <span class="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1">Multi-Agent Flow</span>
             <span class="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1">Live Stream</span>
           </div>
+
+          <div v-if="authUser" class="flex items-center gap-2">
+            <span class="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">{{ authUser.username }}</span>
+            <button type="button" class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600 transition hover:bg-slate-50" @click="logout">
+              Logout
+            </button>
+          </div>
         </div>
       </div>
     </header>
 
-    <main v-if="activeWorkspace === 'run'" class="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-6 sm:px-6 lg:grid-cols-12 lg:px-8">
+    <main v-if="!authUser" class="mx-auto flex max-w-7xl items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+      <section class="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="mb-6">
+          <h2 class="text-lg font-semibold text-slate-950">{{ authMode === 'login' ? 'Login' : 'Create account' }}</h2>
+          <p class="mt-1 text-sm text-slate-500">Sign in to keep tasks and reports isolated by user.</p>
+        </div>
+
+        <div class="space-y-4">
+          <label class="block">
+            <span class="text-sm font-medium text-slate-700">Username</span>
+            <input v-model="authForm.username" type="text" class="mt-1 min-h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" />
+          </label>
+          <label v-if="authMode === 'register'" class="block">
+            <span class="text-sm font-medium text-slate-700">Email</span>
+            <input v-model="authForm.email" type="email" class="mt-1 min-h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" />
+          </label>
+          <label class="block">
+            <span class="text-sm font-medium text-slate-700">Password</span>
+            <input v-model="authForm.password" type="password" class="mt-1 min-h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" />
+          </label>
+        </div>
+
+        <p v-if="authError" class="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ authError }}</p>
+
+        <button type="button" class="mt-5 flex min-h-11 w-full items-center justify-center rounded-lg bg-blue-700 px-4 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:bg-slate-300" :disabled="isAuthLoading" @click="submitAuth">
+          {{ isAuthLoading ? 'Processing' : (authMode === 'login' ? 'Login' : 'Register') }}
+        </button>
+
+        <button type="button" class="mt-4 w-full text-center text-sm font-semibold text-blue-700 hover:text-blue-900" @click="authMode = authMode === 'login' ? 'register' : 'login'">
+          {{ authMode === 'login' ? 'Create a new account' : 'Already have an account' }}
+        </button>
+      </section>
+    </main>
+
+    <main v-else-if="activeWorkspace === 'run'" class="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-6 sm:px-6 lg:grid-cols-12 lg:px-8">
       <aside class="space-y-5 lg:col-span-4">
         <section class="rounded-lg border border-slate-200 bg-white shadow-sm">
           <div class="border-b border-slate-100 px-5 py-4">
@@ -507,7 +548,11 @@ import {
     getTaskLogs,
     getThreadReports,
     getReport,
-    currentThreadId
+    currentThreadId,
+    login as authLogin,
+    register as authRegister,
+    getCurrentUser,
+    setAuthToken
 } from './services/api';
 import StatusFlow from './components/StatusFlow.vue';
 import MarkdownIt from 'markdown-it';
@@ -544,6 +589,11 @@ const activeThreadId = ref(currentThreadId);
 
 const displayedReport = ref('');
 const isTyping = ref(false);
+const authUser = ref(null);
+const authMode = ref('login');
+const authForm = ref({ username: '', email: '', password: '' });
+const authError = ref('');
+const isAuthLoading = ref(false);
 
 const tasks = ref([]);
 const selectedTask = ref(null);
@@ -572,6 +622,36 @@ const workspaceTabs = [
     { id: 'reports', label: 'Reports', icon: HistoryIcon },
     { id: 'settings', label: 'Settings', icon: SettingsIcon }
 ];
+
+const initializeWorkspace = async () => {
+    await loadTasks();
+    await loadReports(currentThreadId);
+};
+
+const submitAuth = async () => {
+    authError.value = '';
+    isAuthLoading.value = true;
+    try {
+        authUser.value = authMode.value === 'login'
+            ? await authLogin(authForm.value.username, authForm.value.password)
+            : await authRegister(authForm.value.username, authForm.value.email, authForm.value.password);
+        await initializeWorkspace();
+    } catch (error) {
+        authError.value = error.message;
+    } finally {
+        isAuthLoading.value = false;
+    }
+};
+
+const logout = () => {
+    setAuthToken('');
+    authUser.value = null;
+    tasks.value = [];
+    reports.value = [];
+    selectedTask.value = null;
+    selectedReport.value = null;
+    activeWorkspace.value = 'run';
+};
 
 const renderedReport = computed(() => {
     let raw = displayedReport.value || '';
@@ -849,8 +929,13 @@ const startResearch = async () => {
 };
 
 onMounted(async () => {
-    await loadTasks();
-    await loadReports(currentThreadId);
+    try {
+        authUser.value = await getCurrentUser();
+        await initializeWorkspace();
+    } catch {
+        setAuthToken('');
+        authUser.value = null;
+    }
 });
 </script>
 

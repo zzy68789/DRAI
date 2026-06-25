@@ -31,15 +31,17 @@ public class ReportRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void save(long taskId, String threadId, String content, String reviewStatus, String critique) {
-        Integer latestVersion = jdbcClient.sql("SELECT COALESCE(MAX(version), 0) FROM report WHERE thread_id = :threadId")
+    public void save(long ownerId, long taskId, String threadId, String content, String reviewStatus, String critique) {
+        Integer latestVersion = jdbcClient.sql("SELECT COALESCE(MAX(version), 0) FROM report WHERE owner_id = :ownerId AND thread_id = :threadId")
+                .param("ownerId", ownerId)
                 .param("threadId", threadId)
                 .query(Integer.class)
                 .single();
         jdbcClient.sql("""
-                        INSERT INTO report(task_id, thread_id, content, version, review_status, critique, created_at)
-                        VALUES (:taskId, :threadId, :content, :version, :reviewStatus, :critique, :createdAt)
+                        INSERT INTO report(owner_id, task_id, thread_id, content, version, review_status, critique, created_at)
+                        VALUES (:ownerId, :taskId, :threadId, :content, :version, :reviewStatus, :critique, :createdAt)
                         """)
+                .param("ownerId", ownerId)
                 .param("taskId", taskId)
                 .param("threadId", threadId)
                 .param("content", content)
@@ -50,37 +52,40 @@ public class ReportRepository {
                 .update();
     }
 
-    public Optional<String> findLatestByThread(String threadId) {
+    public Optional<String> findLatestByThread(long ownerId, String threadId) {
         return jdbcClient.sql("""
                         SELECT content FROM report
-                        WHERE thread_id = :threadId
+                        WHERE owner_id = :ownerId AND thread_id = :threadId
                         ORDER BY version DESC, id DESC
                         LIMIT 1
                         """)
+                .param("ownerId", ownerId)
                 .param("threadId", threadId)
                 .query(String.class)
                 .optional();
     }
 
-    public List<ReportRecord> findReportsByThread(String threadId) {
+    public List<ReportRecord> findReportsByThread(long ownerId, String threadId) {
         return jdbcTemplate.query("""
                         SELECT id, task_id, thread_id, content, version, review_status, critique, created_at
                         FROM report
-                        WHERE thread_id = ?
+                        WHERE owner_id = ? AND thread_id = ?
                         ORDER BY version DESC, id DESC
                         """,
                 REPORT_MAPPER,
+                ownerId,
                 threadId
         );
     }
 
-    public Optional<ReportRecord> findReportById(long reportId) {
+    public Optional<ReportRecord> findReportById(long ownerId, long reportId) {
         return jdbcTemplate.query("""
                         SELECT id, task_id, thread_id, content, version, review_status, critique, created_at
                         FROM report
-                        WHERE id = ?
+                        WHERE owner_id = ? AND id = ?
                         """,
                 REPORT_MAPPER,
+                ownerId,
                 reportId
         ).stream().findFirst();
     }

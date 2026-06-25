@@ -23,7 +23,7 @@ public class WriterNode {
                 PromptTemplates.writer(state.query(), state.searchResults(), state.critique()),
                 LlmClient.ModelType.FAST
         );
-        reportService.saveLatest(state.threadId(), taskId(state), report, state.reviewStatus(), state.critique());
+        reportService.saveLatest(state.ownerId(), state.threadId(), taskId(state), report, state.reviewStatus(), state.critique());
         return Map.of(ResearchState.FINAL_REPORT, report);
     }
 

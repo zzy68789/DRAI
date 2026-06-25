@@ -1,5 +1,7 @@
 package com.zzy.drai.controller;
 
+import com.zzy.drai.auth.UserContext;
+import com.zzy.drai.auth.AuthService;
 import com.zzy.drai.dto.ApiResponse;
 import com.zzy.drai.dto.AgentStepLogResponse;
 import com.zzy.drai.dto.PageResponse;
@@ -21,7 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(TaskQueryController.class)
+@WebMvcTest(value = TaskQueryController.class, properties = "drai.auth.enabled=false")
 class TaskQueryControllerTest {
 
     @Autowired
@@ -30,11 +32,18 @@ class TaskQueryControllerTest {
     @MockitoBean
     TaskQueryService taskQueryService;
 
+    @MockitoBean
+    UserContext userContext;
+
+    @MockitoBean
+    AuthService authService;
+
     @Test
     void listTasksReturnsPagedApiResponse() throws Exception {
         LocalDateTime now = LocalDateTime.of(2026, 6, 24, 10, 0);
         TaskSummaryResponse task = new TaskSummaryResponse(1L, "thread-1", "AI Agent", "hybrid", "COMPLETED", 0, now, now);
-        when(taskQueryService.listTasks(1, 10, "COMPLETED", "agent"))
+        when(userContext.currentUserId()).thenReturn(7L);
+        when(taskQueryService.listTasks(7L, 1, 10, "COMPLETED", "agent"))
                 .thenReturn(new PageResponse<>(List.of(task), 1, 10, 1L));
 
         mockMvc.perform(get("/api/tasks")
@@ -55,7 +64,8 @@ class TaskQueryControllerTest {
     @Test
     void getTaskReturnsTaskDetail() throws Exception {
         LocalDateTime now = LocalDateTime.of(2026, 6, 24, 10, 0);
-        when(taskQueryService.getTask(1L))
+        when(userContext.currentUserId()).thenReturn(7L);
+        when(taskQueryService.getTask(7L, 1L))
                 .thenReturn(new TaskDetailResponse(1L, "thread-1", "AI Agent", "hybrid", "COMPLETED", 0, now, now));
 
         mockMvc.perform(get("/api/tasks/1"))
@@ -69,7 +79,8 @@ class TaskQueryControllerTest {
     void getTaskLogsReturnsAgentStepLogs() throws Exception {
         LocalDateTime now = LocalDateTime.of(2026, 6, 24, 10, 0);
         AgentStepLogResponse log = new AgentStepLogResponse(11L, 1L, "planner", null, "{\"plan\":[]}", "SUCCESS", null, now);
-        when(taskQueryService.getTaskLogs(1L)).thenReturn(List.of(log));
+        when(userContext.currentUserId()).thenReturn(7L);
+        when(taskQueryService.getTaskLogs(7L, 1L)).thenReturn(List.of(log));
 
         mockMvc.perform(get("/api/tasks/1/logs"))
                 .andExpect(status().isOk())
@@ -82,7 +93,8 @@ class TaskQueryControllerTest {
     void getThreadReportsReturnsReportVersions() throws Exception {
         LocalDateTime now = LocalDateTime.of(2026, 6, 24, 10, 0);
         ReportResponse report = new ReportResponse(21L, 1L, "thread-1", "report", 1, "PASS", "", now);
-        when(taskQueryService.getThreadReports("thread-1")).thenReturn(List.of(report));
+        when(userContext.currentUserId()).thenReturn(7L);
+        when(taskQueryService.getThreadReports(7L, "thread-1")).thenReturn(List.of(report));
 
         mockMvc.perform(get("/api/threads/thread-1/reports"))
                 .andExpect(status().isOk())
@@ -94,7 +106,8 @@ class TaskQueryControllerTest {
     @Test
     void getReportReturnsReportDetail() throws Exception {
         LocalDateTime now = LocalDateTime.of(2026, 6, 24, 10, 0);
-        when(taskQueryService.getReport(21L))
+        when(userContext.currentUserId()).thenReturn(7L);
+        when(taskQueryService.getReport(7L, 21L))
                 .thenReturn(new ReportResponse(21L, 1L, "thread-1", "report", 1, "PASS", "", now));
 
         mockMvc.perform(get("/api/reports/21"))
