@@ -22,6 +22,10 @@ public class UserContext {
         return currentUser().userId();
     }
 
+    public String currentUserRole() {
+        return currentUser().role();
+    }
+
     public void clear() {
         CURRENT.remove();
     }

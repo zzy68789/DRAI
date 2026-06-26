@@ -8,7 +8,9 @@ public record AppUserRecord(
         String email,
         String passwordHash,
         String role,
+        String status,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        LocalDateTime lastLoginAt
 ) {
 }

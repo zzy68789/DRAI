@@ -4,6 +4,8 @@ import com.zzy.drai.auth.AuthService;
 import com.zzy.drai.auth.UserContext;
 import com.zzy.drai.dto.ClearResponse;
 import com.zzy.drai.repository.AgentStepLogRepository;
+import com.zzy.drai.repository.AdminAuditLogRepository;
+import com.zzy.drai.repository.AdminRepository;
 import com.zzy.drai.repository.AppUserRepository;
 import com.zzy.drai.repository.CheckpointRepository;
 import com.zzy.drai.repository.ReportRepository;
@@ -62,6 +64,12 @@ class ApplicationSmokeTest {
 
     @MockitoBean
     AppUserRepository appUserRepository;
+
+    @MockitoBean
+    AdminRepository adminRepository;
+
+    @MockitoBean
+    AdminAuditLogRepository adminAuditLogRepository;
 
     @BeforeEach
     void setUp() {

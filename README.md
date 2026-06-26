@@ -124,6 +124,7 @@ backend/src/main/resources/db/schema.sql
 ```text
 backend/src/main/resources/db/upgrade-user-auth.sql
 backend/src/main/resources/db/upgrade-report-library.sql
+backend/src/main/resources/db/upgrade-admin-console.sql
 ```
 
 ### 2. 启动后端
@@ -385,6 +386,19 @@ The report library basic version supports:
 - Soft delete: `DELETE /api/reports/{reportId}`
 
 For an existing MySQL database, run `backend/src/main/resources/db/upgrade-report-library.sql` once before using favorite, soft delete, and report reuse metadata. New databases created from `backend/src/main/resources/db/schema.sql` already include these columns.
+
+## Admin Console
+
+The admin console basic version supports:
+
+- Admin-only APIs under `/api/admin/**`; non-admin users receive HTTP 403.
+- User management: `GET /api/admin/users`, `PATCH /api/admin/users/{userId}/role`, `PATCH /api/admin/users/{userId}/status`.
+- Global task monitoring: `GET /api/admin/tasks`, `GET /api/admin/tasks/{taskId}/logs`.
+- Global report governance: `GET /api/admin/reports`, `DELETE /api/admin/reports/{reportId}`.
+- System status view: `GET /api/admin/system/health`.
+- Audit logging for role changes, user status changes, and admin report deletion.
+
+For an existing MySQL database, run `backend/src/main/resources/db/upgrade-admin-console.sql` once before using the admin console. New databases created from `backend/src/main/resources/db/schema.sql` already include `app_user.status`, `app_user.last_login_at`, and `admin_audit_log`.
 
 ## 当前边界
 

@@ -21,7 +21,7 @@ public class AuthService {
     public AuthenticatedUser register(String username, String email, String password) {
         validate(username, password);
         if (userRepository.findByUsername(username).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "用户名已存在");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
         }
         AppUserRecord user = userRepository.create(username, email, passwordHasher.hash(password), "USER");
         return toAuthenticatedUser(user);
@@ -29,16 +29,21 @@ public class AuthService {
 
     public AuthenticatedUser login(String username, String password) {
         AppUserRecord user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "用户名或密码错误"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password"));
+        ensureActive(user);
         if (!passwordHasher.matches(password, user.passwordHash())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "用户名或密码错误");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password");
         }
+        userRepository.updateLastLoginAt(user.id());
         return toAuthenticatedUser(user);
     }
 
     public AuthenticatedUser resolveToken(String token) {
         TokenClaims claims = tokenService.verify(token);
-        return new AuthenticatedUser(claims.userId(), claims.username(), "", claims.role(), token);
+        AppUserRecord user = userRepository.findById(claims.userId())
+                .orElseThrow(() -> new AuthException("User not found"));
+        ensureActive(user);
+        return new AuthenticatedUser(user.id(), user.username(), user.email(), user.role(), token);
     }
 
     private AuthenticatedUser toAuthenticatedUser(AppUserRecord user) {
@@ -48,7 +53,13 @@ public class AuthService {
 
     private void validate(String username, String password) {
         if (username == null || username.isBlank() || password == null || password.length() < 6) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "用户名不能为空，密码至少 6 位");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is required and password must contain at least 6 characters");
+        }
+    }
+
+    private void ensureActive(AppUserRecord user) {
+        if (!"ACTIVE".equalsIgnoreCase(user.status())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User disabled");
         }
     }
 }

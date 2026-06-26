@@ -4,9 +4,13 @@ CREATE TABLE IF NOT EXISTS app_user (
   email VARCHAR(128),
   password_hash VARCHAR(255) NOT NULL,
   role VARCHAR(32) NOT NULL DEFAULT 'USER',
+  status VARCHAR(32) NOT NULL DEFAULT 'ACTIVE',
+  last_login_at DATETIME,
   created_at DATETIME NOT NULL,
   updated_at DATETIME NOT NULL,
-  UNIQUE KEY uk_app_user_username (username)
+  UNIQUE KEY uk_app_user_username (username),
+  INDEX idx_app_user_role (role),
+  INDEX idx_app_user_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS research_task (
@@ -61,4 +65,17 @@ CREATE TABLE IF NOT EXISTS checkpoint (
   state_json LONGTEXT NOT NULL,
   created_at DATETIME NOT NULL,
   INDEX idx_checkpoint_thread_id (thread_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS admin_audit_log (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  admin_user_id BIGINT NOT NULL,
+  action VARCHAR(64) NOT NULL,
+  target_type VARCHAR(64) NOT NULL,
+  target_id BIGINT NOT NULL,
+  detail LONGTEXT,
+  created_at DATETIME NOT NULL,
+  INDEX idx_admin_audit_admin_user_id (admin_user_id),
+  INDEX idx_admin_audit_target (target_type, target_id),
+  INDEX idx_admin_audit_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -20,8 +20,10 @@ public class AppUserRepository {
             rs.getString("email"),
             rs.getString("password_hash"),
             rs.getString("role"),
+            rs.getString("status"),
             rs.getObject("created_at", LocalDateTime.class),
-            rs.getObject("updated_at", LocalDateTime.class)
+            rs.getObject("updated_at", LocalDateTime.class),
+            rs.getObject("last_login_at", LocalDateTime.class)
     );
 
     private final JdbcTemplate jdbcTemplate;
@@ -35,8 +37,8 @@ public class AppUserRepository {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement statement = connection.prepareStatement("""
-                    INSERT INTO app_user(username, email, password_hash, role, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?)
+                    INSERT INTO app_user(username, email, password_hash, role, status, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, 'ACTIVE', ?, ?)
                     """, Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, username);
             statement.setString(2, email);
@@ -50,17 +52,37 @@ public class AppUserRepository {
         if (key == null) {
             throw new IllegalStateException("创建用户后未返回主键");
         }
-        return new AppUserRecord(key.longValue(), username, email, passwordHash, role, now, now);
+        return new AppUserRecord(key.longValue(), username, email, passwordHash, role, "ACTIVE", now, now, null);
     }
 
     public Optional<AppUserRecord> findByUsername(String username) {
         return jdbcTemplate.query("""
-                        SELECT id, username, email, password_hash, role, created_at, updated_at
+                        SELECT id, username, email, password_hash, role, status, created_at, updated_at, last_login_at
                         FROM app_user
                         WHERE username = ?
                         """,
                 USER_MAPPER,
                 username
         ).stream().findFirst();
+    }
+
+    public Optional<AppUserRecord> findById(long userId) {
+        return jdbcTemplate.query("""
+                        SELECT id, username, email, password_hash, role, status, created_at, updated_at, last_login_at
+                        FROM app_user
+                        WHERE id = ?
+                        """,
+                USER_MAPPER,
+                userId
+        ).stream().findFirst();
+    }
+
+    public void updateLastLoginAt(long userId) {
+        jdbcTemplate.update(
+                "UPDATE app_user SET last_login_at = ?, updated_at = ? WHERE id = ?",
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                userId
+        );
     }
 }

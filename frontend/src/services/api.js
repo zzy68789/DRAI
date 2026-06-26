@@ -167,6 +167,56 @@ export async function indexReportToKnowledgeBase(reportId) {
   });
 }
 
+export async function adminListUsers({ keyword = '' } = {}) {
+  const params = new URLSearchParams();
+  if (keyword) params.set('keyword', keyword);
+  const query = params.toString();
+  return requestJson(`/admin/users${query ? `?${query}` : ''}`);
+}
+
+export async function adminUpdateUserRole(userId, role) {
+  return requestJson(`/admin/users/${userId}/role?role=${encodeURIComponent(role)}`, {
+      method: 'PATCH'
+  });
+}
+
+export async function adminUpdateUserStatus(userId, status) {
+  return requestJson(`/admin/users/${userId}/status?status=${encodeURIComponent(status)}`, {
+      method: 'PATCH'
+  });
+}
+
+export async function adminListTasks({ status = '', ownerId = '', keyword = '' } = {}) {
+  const params = new URLSearchParams();
+  if (status) params.set('status', status);
+  if (ownerId) params.set('ownerId', String(ownerId));
+  if (keyword) params.set('keyword', keyword);
+  const query = params.toString();
+  return requestJson(`/admin/tasks${query ? `?${query}` : ''}`);
+}
+
+export async function adminGetTaskLogs(taskId) {
+  return requestJson(`/admin/tasks/${taskId}/logs`);
+}
+
+export async function adminListReports({ ownerId = '', keyword = '' } = {}) {
+  const params = new URLSearchParams();
+  if (ownerId) params.set('ownerId', String(ownerId));
+  if (keyword) params.set('keyword', keyword);
+  const query = params.toString();
+  return requestJson(`/admin/reports${query ? `?${query}` : ''}`);
+}
+
+export async function adminDeleteReport(reportId) {
+  return requestJson(`/admin/reports/${reportId}`, {
+      method: 'DELETE'
+  });
+}
+
+export async function adminSystemHealth() {
+  return requestJson('/admin/system/health');
+}
+
 /**
  * 流式聊天
  * @param {string} query - 问题

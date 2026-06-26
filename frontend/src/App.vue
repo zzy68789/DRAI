@@ -44,7 +44,7 @@
               type="button"
               class="flex min-h-9 items-center gap-2 rounded-md px-3 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
               :class="activeWorkspace === tab.id ? 'bg-white text-blue-800 shadow-sm' : 'text-slate-600 hover:bg-white/70 hover:text-slate-950'"
-              @click="activeWorkspace = tab.id"
+              @click="setWorkspace(tab.id)"
             >
               <component :is="tab.icon" class="h-4 w-4" aria-hidden="true" />
               <span>{{ tab.label }}</span>
@@ -537,6 +537,146 @@
       </section>
     </main>
 
+    <main v-else-if="activeWorkspace === 'admin'" class="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-6 sm:px-6 lg:grid-cols-12 lg:px-8">
+      <section class="space-y-6 lg:col-span-4">
+        <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+          <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+            <div>
+              <h2 class="text-base font-semibold text-slate-950">Admin Console</h2>
+              <p class="mt-1 text-sm text-slate-500">Cross-user operations and system status</p>
+            </div>
+            <button type="button" class="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-50" @click="loadAdminDashboard" aria-label="Refresh admin dashboard">
+              <RefreshCwIcon class="h-4 w-4" :class="isLoadingAdmin ? 'animate-spin' : ''" aria-hidden="true" />
+            </button>
+          </div>
+          <div v-if="adminError" class="border-b border-rose-100 bg-rose-50 px-5 py-3 text-sm text-rose-700">{{ adminError }}</div>
+          <div class="grid grid-cols-1 divide-y divide-slate-100">
+            <div v-for="(status, name) in adminHealth" :key="name" class="flex items-center justify-between px-5 py-3">
+              <span class="text-sm font-medium capitalize text-slate-700">{{ name }}</span>
+              <span class="rounded-md px-2 py-1 text-[11px] font-semibold ring-1" :class="statusStyles(status)">{{ status }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+          <div class="border-b border-slate-100 px-5 py-4">
+            <h2 class="text-base font-semibold text-slate-950">Users</h2>
+            <div class="mt-3 flex gap-2">
+              <input v-model="adminUserKeyword" type="search" class="min-h-10 min-w-0 flex-1 rounded-lg border border-slate-200 px-3 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" placeholder="Search users..." @keyup.enter="loadAdminUsers" />
+              <button type="button" class="rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50" @click="loadAdminUsers">Search</button>
+            </div>
+          </div>
+          <div class="divide-y divide-slate-100">
+            <div v-for="user in adminUsers" :key="user.id" class="px-5 py-4">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-semibold text-slate-950">{{ user.username }}</p>
+                  <p class="mt-1 text-xs text-slate-500">{{ user.email || '-' }}</p>
+                </div>
+                <span class="rounded-md px-2 py-1 text-[11px] font-semibold ring-1" :class="statusStyles(user.status)">{{ user.status }}</span>
+              </div>
+              <div class="mt-3 grid grid-cols-2 gap-2">
+                <select :value="user.role" class="min-h-9 rounded-lg border border-slate-200 px-2 text-sm" @change="changeAdminUserRole(user, $event.target.value)">
+                  <option value="USER">USER</option>
+                  <option value="ADMIN">ADMIN</option>
+                </select>
+                <select :value="user.status" class="min-h-9 rounded-lg border border-slate-200 px-2 text-sm" @change="changeAdminUserStatus(user, $event.target.value)">
+                  <option value="ACTIVE">ACTIVE</option>
+                  <option value="DISABLED">DISABLED</option>
+                </select>
+              </div>
+            </div>
+            <div v-if="adminUsers.length === 0" class="px-5 py-8 text-sm text-slate-500">No users found.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="space-y-6 lg:col-span-8">
+        <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+          <div class="border-b border-slate-100 px-5 py-4">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 class="text-base font-semibold text-slate-950">Global Tasks</h2>
+                <p class="mt-1 text-sm text-slate-500">Cross-user task monitoring</p>
+              </div>
+              <button type="button" class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" @click="loadAdminTasks">Refresh</button>
+            </div>
+            <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <input v-model="adminTaskKeyword" type="search" class="min-h-10 rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" placeholder="Keyword" @keyup.enter="loadAdminTasks" />
+              <input v-model="adminTaskOwnerId" type="number" class="min-h-10 rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" placeholder="Owner ID" @keyup.enter="loadAdminTasks" />
+              <select v-model="adminTaskStatus" class="min-h-10 rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" @change="loadAdminTasks">
+                <option value="">All status</option>
+                <option value="RUNNING">RUNNING</option>
+                <option value="COMPLETED">COMPLETED</option>
+                <option value="FAILED">FAILED</option>
+              </select>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[760px] text-left text-sm">
+              <thead class="border-b border-slate-100 bg-slate-50 text-xs uppercase text-slate-500">
+                <tr>
+                  <th class="px-5 py-3">Task</th>
+                  <th class="px-5 py-3">Owner</th>
+                  <th class="px-5 py-3">Status</th>
+                  <th class="px-5 py-3">Updated</th>
+                  <th class="px-5 py-3">Logs</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr v-for="task in adminTasks" :key="task.id" class="hover:bg-slate-50">
+                  <td class="px-5 py-4">
+                    <p class="max-w-md truncate font-semibold text-slate-950">{{ task.query }}</p>
+                    <p class="mt-1 text-xs text-slate-500">{{ task.threadId }}</p>
+                  </td>
+                  <td class="px-5 py-4 text-slate-600">{{ task.ownerUsername }} #{{ task.ownerId }}</td>
+                  <td class="px-5 py-4"><span class="rounded-md px-2 py-1 text-[11px] font-semibold ring-1" :class="statusStyles(task.status)">{{ task.status }}</span></td>
+                  <td class="px-5 py-4 text-slate-500">{{ formatDate(task.updatedAt) }}</td>
+                  <td class="px-5 py-4"><button type="button" class="text-sm font-semibold text-blue-700 hover:text-blue-900" @click="loadAdminTaskLogs(task)">View</button></td>
+                </tr>
+                <tr v-if="adminTasks.length === 0"><td colspan="5" class="px-5 py-8 text-sm text-slate-500">No tasks found.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-if="adminSelectedTask" class="border-t border-slate-100 px-5 py-4">
+            <h3 class="text-sm font-semibold text-slate-950">Logs for task #{{ adminSelectedTask.id }}</h3>
+            <div class="mt-3 max-h-56 space-y-2 overflow-auto">
+              <pre v-for="log in adminTaskLogs" :key="log.id" class="rounded-lg bg-slate-950 p-3 text-xs leading-5 text-slate-200">{{ log.stepName }} · {{ log.status }}\n{{ log.errorMessage || log.outputSnapshot }}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+          <div class="border-b border-slate-100 px-5 py-4">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 class="text-base font-semibold text-slate-950">Global Reports</h2>
+                <p class="mt-1 text-sm text-slate-500">Cross-user report governance</p>
+              </div>
+              <button type="button" class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" @click="loadAdminReports">Refresh</button>
+            </div>
+            <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <input v-model="adminReportKeyword" type="search" class="min-h-10 rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" placeholder="Keyword" @keyup.enter="loadAdminReports" />
+              <input v-model="adminReportOwnerId" type="number" class="min-h-10 rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" placeholder="Owner ID" @keyup.enter="loadAdminReports" />
+            </div>
+          </div>
+          <div class="divide-y divide-slate-100">
+            <div v-for="report in adminReports" :key="report.id" class="px-5 py-4">
+              <div class="flex items-start justify-between gap-4">
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-semibold text-slate-950">{{ report.threadId }} · v{{ report.version }}</p>
+                  <p class="mt-1 text-xs text-slate-500">{{ report.ownerUsername }} #{{ report.ownerId }} · {{ formatDate(report.createdAt) }}</p>
+                </div>
+                <button type="button" class="rounded-lg border border-rose-200 px-3 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50" @click="deleteAdminReport(report)">Delete</button>
+              </div>
+              <p class="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">{{ report.content }}</p>
+            </div>
+            <div v-if="adminReports.length === 0" class="px-5 py-8 text-sm text-slate-500">No reports found.</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
     <main v-else class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <section class="rounded-lg border border-slate-200 bg-white shadow-sm">
         <div class="border-b border-slate-100 px-5 py-4">
@@ -583,6 +723,7 @@ import {
     SendIcon,
     ServerIcon,
     SettingsIcon,
+    ShieldCheckIcon,
     StarIcon,
     TerminalIcon,
     Trash2Icon,
@@ -603,6 +744,14 @@ import {
     updateReportFavorite,
     deleteReport as deleteReportApi,
     indexReportToKnowledgeBase,
+    adminListUsers,
+    adminUpdateUserRole,
+    adminUpdateUserStatus,
+    adminListTasks,
+    adminGetTaskLogs,
+    adminListReports,
+    adminDeleteReport,
+    adminSystemHealth,
     currentThreadId,
     login as authLogin,
     register as authRegister,
@@ -666,6 +815,22 @@ const reportError = ref('');
 const reportScope = ref('thread');
 const reportKeyword = ref('');
 const favoriteOnly = ref(false);
+
+const isLoadingAdmin = ref(false);
+const adminError = ref('');
+const adminHealth = ref({});
+const adminUsers = ref([]);
+const adminTasks = ref([]);
+const adminReports = ref([]);
+const adminTaskLogs = ref([]);
+const adminSelectedTask = ref(null);
+const adminUserKeyword = ref('');
+const adminTaskKeyword = ref('');
+const adminTaskOwnerId = ref('');
+const adminTaskStatus = ref('');
+const adminReportKeyword = ref('');
+const adminReportOwnerId = ref('');
+
 const configItems = computed(() => [
     { name: 'LLM Provider', status: 'Configured by backend', desc: 'OpenAI-compatible chat model with local fallback', icon: ServerIcon },
     { name: 'Tavily Search', status: 'Optional key', desc: 'Web search source with fallback result when key is missing', icon: Globe2Icon },
@@ -674,16 +839,29 @@ const configItems = computed(() => [
     { name: 'ChromaDB', status: 'Optional vector store', desc: 'Vector RAG store with local in-memory fallback', icon: SearchIcon }
 ]);
 
-const workspaceTabs = [
-    { id: 'run', label: 'Run', icon: SendIcon },
-    { id: 'tasks', label: 'Tasks', icon: ClipboardListIcon },
-    { id: 'reports', label: 'Reports', icon: HistoryIcon },
-    { id: 'settings', label: 'Settings', icon: SettingsIcon }
-];
+const workspaceTabs = computed(() => {
+    const tabs = [
+        { id: 'run', label: 'Run', icon: SendIcon },
+        { id: 'tasks', label: 'Tasks', icon: ClipboardListIcon },
+        { id: 'reports', label: 'Reports', icon: HistoryIcon },
+        { id: 'settings', label: 'Settings', icon: SettingsIcon }
+    ];
+    if (authUser.value?.role === 'ADMIN') {
+        tabs.splice(3, 0, { id: 'admin', label: 'Admin', icon: ShieldCheckIcon });
+    }
+    return tabs;
+});
 
 const initializeWorkspace = async () => {
     await loadTasks();
     await loadReports(currentThreadId);
+};
+
+const setWorkspace = async (workspace) => {
+    activeWorkspace.value = workspace;
+    if (workspace === 'admin' && authUser.value?.role === 'ADMIN') {
+        await loadAdminDashboard();
+    }
 };
 
 const submitAuth = async () => {
@@ -706,8 +884,14 @@ const logout = () => {
     authUser.value = null;
     tasks.value = [];
     reports.value = [];
+    adminUsers.value = [];
+    adminTasks.value = [];
+    adminReports.value = [];
+    adminTaskLogs.value = [];
+    adminHealth.value = {};
     selectedTask.value = null;
     selectedReport.value = null;
+    adminSelectedTask.value = null;
     activeWorkspace.value = 'run';
 };
 
@@ -901,6 +1085,83 @@ const deleteSelectedReport = async () => {
         reports.value = reports.value.filter((report) => report.id !== selectedReport.value.id);
         selectedReport.value = reports.value[0] || null;
         displayedReport.value = selectedReport.value?.content || '';
+    } catch (error) {
+        triggerWarning(error.message);
+    }
+};
+
+const loadAdminDashboard = async () => {
+    isLoadingAdmin.value = true;
+    adminError.value = '';
+    try {
+        await Promise.all([
+            loadAdminHealth(),
+            loadAdminUsers(),
+            loadAdminTasks(),
+            loadAdminReports()
+        ]);
+    } catch (error) {
+        adminError.value = error.message;
+    } finally {
+        isLoadingAdmin.value = false;
+    }
+};
+
+const loadAdminHealth = async () => {
+    const health = await adminSystemHealth();
+    adminHealth.value = health.components || {};
+};
+
+const loadAdminUsers = async () => {
+    adminUsers.value = await adminListUsers({ keyword: adminUserKeyword.value });
+};
+
+const changeAdminUserRole = async (user, role) => {
+    try {
+        const updated = await adminUpdateUserRole(user.id, role);
+        adminUsers.value = adminUsers.value.map((item) => item.id === updated.id ? updated : item);
+    } catch (error) {
+        triggerWarning(error.message);
+        await loadAdminUsers();
+    }
+};
+
+const changeAdminUserStatus = async (user, status) => {
+    try {
+        const updated = await adminUpdateUserStatus(user.id, status);
+        adminUsers.value = adminUsers.value.map((item) => item.id === updated.id ? updated : item);
+    } catch (error) {
+        triggerWarning(error.message);
+        await loadAdminUsers();
+    }
+};
+
+const loadAdminTasks = async () => {
+    adminTasks.value = await adminListTasks({
+        status: adminTaskStatus.value,
+        ownerId: adminTaskOwnerId.value,
+        keyword: adminTaskKeyword.value
+    });
+};
+
+const loadAdminTaskLogs = async (task) => {
+    adminSelectedTask.value = task;
+    adminTaskLogs.value = await adminGetTaskLogs(task.id);
+};
+
+const loadAdminReports = async () => {
+    adminReports.value = await adminListReports({
+        ownerId: adminReportOwnerId.value,
+        keyword: adminReportKeyword.value
+    });
+};
+
+const deleteAdminReport = async (report) => {
+    const confirmed = window.confirm(`Delete report #${report.id}?`);
+    if (!confirmed) return;
+    try {
+        await adminDeleteReport(report.id);
+        adminReports.value = adminReports.value.filter((item) => item.id !== report.id);
     } catch (error) {
         triggerWarning(error.message);
     }

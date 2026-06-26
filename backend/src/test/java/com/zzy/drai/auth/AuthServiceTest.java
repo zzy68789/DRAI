@@ -23,9 +23,11 @@ class AuthServiceTest {
 
         when(userRepository.findByUsername("alice")).thenReturn(Optional.empty());
         when(userRepository.create(org.mockito.ArgumentMatchers.eq("alice"), org.mockito.ArgumentMatchers.eq("alice@example.com"), anyString(), org.mockito.ArgumentMatchers.eq("USER")))
-                .thenReturn(new AppUserRecord(7L, "alice", "alice@example.com", passwordHasher.hash("pass123"), "USER", LocalDateTime.now(), LocalDateTime.now()));
+                .thenReturn(new AppUserRecord(7L, "alice", "alice@example.com", passwordHasher.hash("pass123"), "USER", "ACTIVE", LocalDateTime.now(), LocalDateTime.now(), null));
 
         AuthenticatedUser user = authService.register("alice", "alice@example.com", "pass123");
+        when(userRepository.findById(7L))
+                .thenReturn(Optional.of(new AppUserRecord(7L, "alice", "alice@example.com", "", "USER", "ACTIVE", LocalDateTime.now(), LocalDateTime.now(), null)));
         AuthenticatedUser resolved = authService.resolveToken(user.token());
 
         assertThat(user.userId()).isEqualTo(7L);
@@ -44,7 +46,7 @@ class AuthServiceTest {
         String hash = passwordHasher.hash("pass123");
 
         when(userRepository.findByUsername("alice"))
-                .thenReturn(Optional.of(new AppUserRecord(7L, "alice", "alice@example.com", hash, "USER", LocalDateTime.now(), LocalDateTime.now())));
+                .thenReturn(Optional.of(new AppUserRecord(7L, "alice", "alice@example.com", hash, "USER", "ACTIVE", LocalDateTime.now(), LocalDateTime.now(), null)));
 
         AuthenticatedUser user = authService.login("alice", "pass123");
 
