@@ -7,7 +7,7 @@ spring:
   datasource:
     url: ${DRAI_DATASOURCE_URL:jdbc:mysql://localhost:3306/drai?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
     username: ${DRAI_DATASOURCE_USERNAME:root}
-    password: ${DRAI_DATASOURCE_PASSWORD:}
+    password: ${DRAI_DATASOURCE_PASSWORD:123456}
     driver-class-name: ${DRAI_DATASOURCE_DRIVER:com.mysql.cj.jdbc.Driver}
   data:
     redis:

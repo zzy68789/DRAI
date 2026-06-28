@@ -11,7 +11,7 @@
       <button
         type="button"
         class="rounded-md p-1 text-amber-700 transition hover:bg-amber-100 hover:text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
-        aria-label="Dismiss warning"
+        aria-label="关闭提示"
         @click="showWarning = false"
       >
         <XIcon class="h-4 w-4" aria-hidden="true" />
@@ -19,31 +19,28 @@
     </div>
   </transition>
 
-  <div class="min-h-screen bg-[#f6f8fb] text-slate-950 selection:bg-blue-100 selection:text-blue-950">
-    <header class="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur">
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-100 text-slate-950 selection:bg-blue-100 selection:text-blue-950">
+    <header class="sticky top-0 z-40 border-b border-blue-100/80 bg-white/90 shadow-sm shadow-blue-100/40 backdrop-blur">
       <div class="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
         <div class="flex items-center gap-3">
-          <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-950 text-white shadow-sm">
+          <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-700 text-white shadow-sm shadow-blue-200">
             <BotIcon class="h-5 w-5" aria-hidden="true" />
           </div>
           <div>
-            <h1 class="text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
-              DRAI Research Agent
+            <h1 class="text-xl font-semibold tracking-tight text-blue-950 sm:text-2xl">
+              DRAI 深度研究助手
             </h1>
-            <p class="text-sm text-slate-500">
-              Spring Boot · LangGraph4j · RAG · SSE
-            </p>
           </div>
         </div>
 
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <nav v-if="authUser" class="flex rounded-lg border border-slate-200 bg-slate-50 p-1" aria-label="Workspace">
+          <nav v-if="authUser" class="flex rounded-lg border border-blue-100 bg-blue-50 p-1" aria-label="工作区">
             <button
               v-for="tab in workspaceTabs"
               :key="tab.id"
               type="button"
               class="flex min-h-9 items-center gap-2 rounded-md px-3 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
-              :class="activeWorkspace === tab.id ? 'bg-white text-blue-800 shadow-sm' : 'text-slate-600 hover:bg-white/70 hover:text-slate-950'"
+              :class="activeWorkspace === tab.id ? 'bg-white text-blue-800 shadow-sm' : 'text-slate-600 hover:bg-white/70 hover:text-blue-950'"
               @click="setWorkspace(tab.id)"
             >
               <component :is="tab.icon" class="h-4 w-4" aria-hidden="true" />
@@ -51,16 +48,10 @@
             </button>
           </nav>
 
-          <div class="hidden flex-wrap gap-2 text-xs font-medium text-slate-600 xl:flex">
-            <span class="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1">Java Backend</span>
-            <span class="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1">Multi-Agent Flow</span>
-            <span class="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1">Live Stream</span>
-          </div>
-
           <div v-if="authUser" class="flex items-center gap-2">
-            <span class="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">{{ authUser.username }}</span>
-            <button type="button" class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600 transition hover:bg-slate-50" @click="logout">
-              Logout
+            <span class="rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-800">{{ authUser.username }}</span>
+            <button type="button" class="rounded-md border border-blue-100 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 transition hover:bg-blue-50 hover:text-blue-800" @click="logout">
+              退出
             </button>
           </div>
         </div>
@@ -68,49 +59,52 @@
     </header>
 
     <main v-if="!authUser" class="mx-auto flex max-w-7xl items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-      <section class="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+      <section class="w-full max-w-md overflow-hidden rounded-lg border border-blue-100 bg-white shadow-sm shadow-blue-100/60">
+        <div class="h-1 bg-blue-600"></div>
+        <div class="p-6">
         <div class="mb-6">
-          <h2 class="text-lg font-semibold text-slate-950">{{ authMode === 'login' ? 'Login' : 'Create account' }}</h2>
-          <p class="mt-1 text-sm text-slate-500">Sign in to keep tasks and reports isolated by user.</p>
+          <h2 class="text-lg font-semibold text-blue-950">{{ authMode === 'login' ? '登录' : '创建账号' }}</h2>
+          <p class="mt-1 text-sm text-slate-500">登录后可按用户隔离研究任务与报告。</p>
         </div>
 
         <div class="space-y-4">
           <label class="block">
-            <span class="text-sm font-medium text-slate-700">Username</span>
-            <input v-model="authForm.username" type="text" class="mt-1 min-h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" />
+            <span class="text-sm font-medium text-slate-700">用户名</span>
+            <input v-model="authForm.username" type="text" class="mt-1 min-h-10 w-full rounded-lg border border-blue-100 px-3 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" />
           </label>
           <label v-if="authMode === 'register'" class="block">
-            <span class="text-sm font-medium text-slate-700">Email</span>
-            <input v-model="authForm.email" type="email" class="mt-1 min-h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" />
+            <span class="text-sm font-medium text-slate-700">邮箱</span>
+            <input v-model="authForm.email" type="email" class="mt-1 min-h-10 w-full rounded-lg border border-blue-100 px-3 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" />
           </label>
           <label class="block">
-            <span class="text-sm font-medium text-slate-700">Password</span>
-            <input v-model="authForm.password" type="password" class="mt-1 min-h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" />
+            <span class="text-sm font-medium text-slate-700">密码</span>
+            <input v-model="authForm.password" type="password" class="mt-1 min-h-10 w-full rounded-lg border border-blue-100 px-3 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" />
           </label>
         </div>
 
         <p v-if="authError" class="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ authError }}</p>
 
         <button type="button" class="mt-5 flex min-h-11 w-full items-center justify-center rounded-lg bg-blue-700 px-4 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:bg-slate-300" :disabled="isAuthLoading" @click="submitAuth">
-          {{ isAuthLoading ? 'Processing' : (authMode === 'login' ? 'Login' : 'Register') }}
+          {{ isAuthLoading ? '处理中' : (authMode === 'login' ? '登录' : '注册') }}
         </button>
 
         <button type="button" class="mt-4 w-full text-center text-sm font-semibold text-blue-700 hover:text-blue-900" @click="authMode = authMode === 'login' ? 'register' : 'login'">
-          {{ authMode === 'login' ? 'Create a new account' : 'Already have an account' }}
+          {{ authMode === 'login' ? '创建新账号' : '已有账号，去登录' }}
         </button>
+        </div>
       </section>
     </main>
 
     <main v-else-if="activeWorkspace === 'run'" class="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-6 sm:px-6 lg:grid-cols-12 lg:px-8">
       <aside class="space-y-5 lg:col-span-4">
-        <section class="rounded-lg border border-slate-200 bg-white shadow-sm">
-          <div class="border-b border-slate-100 px-5 py-4">
+        <section class="overflow-hidden rounded-lg border border-blue-100 bg-white shadow-sm shadow-blue-100/50">
+          <div class="border-b border-blue-100 bg-blue-50/70 px-5 py-4">
             <div class="flex items-center justify-between gap-3">
               <div>
-                <h2 class="text-sm font-semibold text-slate-950">Knowledge Base</h2>
-                <p class="mt-1 text-xs text-slate-500">PDF evidence for document mode</p>
+                <h2 class="text-sm font-semibold text-blue-950">知识库</h2>
+                <p class="mt-1 text-xs text-slate-500">上传 PDF 后可使用文档检索模式</p>
               </div>
-              <span class="rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">Max 5 PDFs</span>
+              <span class="rounded-md bg-white px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-100">最多 5 个 PDF</span>
             </div>
           </div>
 
@@ -129,7 +123,7 @@
                 multiple
                 accept=".pdf"
                 class="absolute inset-0 cursor-pointer opacity-0"
-                aria-label="Upload PDF documents"
+                aria-label="上传 PDF 文档"
                 @change="handleFileSelect"
               />
 
@@ -137,8 +131,8 @@
                 <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-white text-blue-700 shadow-sm ring-1 ring-slate-200">
                   <UploadCloudIcon class="h-5 w-5" aria-hidden="true" />
                 </div>
-                <p class="text-sm font-medium text-slate-800">Drop PDF files here</p>
-                <p class="mt-1 text-xs text-slate-500">or click to select local files</p>
+                <p class="text-sm font-medium text-slate-800">拖拽 PDF 文件到这里</p>
+                <p class="mt-1 text-xs text-slate-500">也可以点击选择本地文件</p>
               </div>
 
               <div v-else class="pointer-events-none z-10 w-full space-y-2">
@@ -158,16 +152,16 @@
           </div>
         </section>
 
-        <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+        <section class="rounded-lg border border-blue-100 bg-white p-5 shadow-sm shadow-blue-100/50">
           <div class="mb-3 flex items-center justify-between gap-3">
             <div>
-              <h2 class="text-sm font-semibold text-slate-950">Retrieval Mode</h2>
-              <p class="mt-1 text-xs text-slate-500">Choose evidence source for the next run</p>
+              <h2 class="text-sm font-semibold text-blue-950">检索模式</h2>
+              <p class="mt-1 text-xs text-slate-500">选择本次研究使用的证据来源</p>
             </div>
             <SearchIcon class="h-4 w-4 text-slate-400" aria-hidden="true" />
           </div>
 
-          <div class="grid grid-cols-2 gap-2" role="group" aria-label="Search mode">
+          <div class="grid grid-cols-2 gap-2" role="group" aria-label="检索模式">
             <button
               type="button"
               :aria-pressed="searchMode === 'document'"
@@ -177,7 +171,7 @@
               @click="setMode('document')"
             >
               <FileTextIcon class="h-4 w-4" aria-hidden="true" />
-              Doc Only
+              仅文档
             </button>
 
             <button
@@ -188,19 +182,19 @@
               @click="setMode('hybrid')"
             >
               <Globe2Icon class="h-4 w-4" aria-hidden="true" />
-              Hybrid
+              混合检索
             </button>
           </div>
         </section>
 
-        <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          <label for="research-query" class="text-sm font-semibold text-slate-950">Research Task</label>
+        <section class="rounded-lg border border-blue-100 bg-white p-5 shadow-sm shadow-blue-100/50">
+          <label for="research-query" class="text-sm font-semibold text-blue-950">研究任务</label>
           <textarea
             id="research-query"
             v-model="query"
             class="mt-3 min-h-28 w-full resize-none rounded-lg border border-slate-200 bg-white p-3 text-sm leading-6 text-slate-800 shadow-sm transition placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
             rows="4"
-            placeholder="Enter a research topic or a follow-up revision request..."
+            placeholder="请输入研究主题，或输入对上一版报告的修订要求..."
             :disabled="isLoading"
           ></textarea>
 
@@ -212,7 +206,7 @@
           >
             <Loader2Icon v-if="isLoading" class="h-4 w-4 animate-spin" aria-hidden="true" />
             <SendIcon v-else class="h-4 w-4" aria-hidden="true" />
-            <span>{{ isLoading ? 'Processing' : 'Run Research' }}</span>
+            <span>{{ isLoading ? '研究中' : '开始研究' }}</span>
           </button>
         </section>
 
@@ -222,7 +216,7 @@
           <div class="flex items-center justify-between border-b border-slate-800 bg-slate-900 px-4 py-3">
             <div class="flex items-center gap-2">
               <TerminalIcon class="h-4 w-4 text-blue-300" aria-hidden="true" />
-              <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-200">Runtime Logs</h2>
+              <h2 class="text-xs font-semibold tracking-wide text-slate-200">运行日志</h2>
             </div>
             <span class="text-xs text-slate-500">SSE</span>
           </div>
@@ -231,7 +225,7 @@
             class="h-36 overflow-y-auto p-4 font-mono text-[11px] leading-5"
             aria-live="polite"
           >
-            <div v-if="logs.length === 0" class="text-slate-500">System ready. Waiting for input.</div>
+            <div v-if="logs.length === 0" class="text-slate-500">系统已就绪，等待输入。</div>
             <div v-for="(log, i) in logs" :key="i" class="flex gap-2 py-0.5">
               <span class="shrink-0 text-blue-300">&gt;</span>
               <span class="break-all text-slate-300">{{ log }}</span>
@@ -242,38 +236,38 @@
       </aside>
 
       <section class="lg:col-span-8">
-        <div class="flex min-h-[calc(100vh-9rem)] flex-col rounded-lg border border-slate-200 bg-white shadow-sm">
-          <div class="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex min-h-[calc(100vh-9rem)] flex-col overflow-hidden rounded-lg border border-blue-100 bg-white shadow-sm shadow-blue-100/50">
+          <div class="flex flex-col gap-3 border-b border-blue-100 bg-blue-50/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 class="text-base font-semibold text-slate-950">Research Report</h2>
-              <p class="mt-1 text-sm text-slate-500">Generated output from the agent workflow</p>
+              <h2 class="text-base font-semibold text-blue-950">研究报告</h2>
+              <p class="mt-1 text-sm text-slate-500">智能体工作流生成的报告内容</p>
             </div>
             <div class="flex items-center gap-2 text-xs font-medium text-slate-500">
-              <span class="rounded-md bg-slate-100 px-2 py-1">{{ searchMode.toUpperCase() }}</span>
-              <span class="rounded-md bg-slate-100 px-2 py-1">{{ currentStep === 'idle' ? 'READY' : currentStep.toUpperCase() }}</span>
+              <span class="rounded-md bg-white px-2 py-1 text-blue-700 ring-1 ring-blue-100">{{ searchModeLabel(searchMode) }}</span>
+              <span class="rounded-md bg-white px-2 py-1 text-blue-700 ring-1 ring-blue-100">{{ currentStepLabel(currentStep) }}</span>
             </div>
           </div>
 
           <div class="flex-1 p-5 sm:p-6 lg:p-8">
-            <div v-if="!displayedReport && !isLoading" class="flex min-h-[28rem] flex-col items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50 px-6 text-center">
-              <div class="flex h-14 w-14 items-center justify-center rounded-lg bg-white text-slate-500 shadow-sm ring-1 ring-slate-200">
+            <div v-if="!displayedReport && !isLoading" class="flex min-h-[28rem] flex-col items-center justify-center rounded-lg border border-dashed border-blue-200 bg-blue-50/50 px-6 text-center">
+              <div class="flex h-14 w-14 items-center justify-center rounded-lg bg-white text-blue-500 shadow-sm ring-1 ring-blue-100">
                 <FileOutputIcon class="h-7 w-7" aria-hidden="true" />
               </div>
-              <h3 class="mt-5 text-base font-semibold text-slate-950">No report generated</h3>
+              <h3 class="mt-5 text-base font-semibold text-blue-950">暂无研究报告</h3>
               <p class="mt-2 max-w-sm text-sm leading-6 text-slate-500">
-                The report workspace will populate after the agent completes a research run.
+                完成一次研究后，报告会显示在这里。
               </p>
             </div>
 
-            <div v-else-if="isLoading && !displayedReport" class="flex min-h-[28rem] flex-col justify-center rounded-lg border border-slate-200 bg-white px-6">
+            <div v-else-if="isLoading && !displayedReport" class="flex min-h-[28rem] flex-col justify-center rounded-lg border border-blue-100 bg-white px-6">
               <div class="mx-auto w-full max-w-xl">
                 <div class="mb-6 flex items-center gap-3">
                   <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
                     <Loader2Icon class="h-5 w-5 animate-spin" aria-hidden="true" />
                   </div>
                   <div>
-                    <h3 class="text-sm font-semibold text-slate-950">Agent workflow running</h3>
-                    <p class="mt-1 text-xs text-slate-500">Current step: {{ currentStep }}</p>
+                    <h3 class="text-sm font-semibold text-blue-950">研究流程运行中</h3>
+                    <p class="mt-1 text-xs text-slate-500">当前步骤：{{ currentStepLabel(currentStep) }}</p>
                   </div>
                 </div>
 
@@ -297,12 +291,12 @@
 
     <main v-else-if="activeWorkspace === 'tasks'" class="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-6 sm:px-6 lg:grid-cols-12 lg:px-8">
       <section class="lg:col-span-5">
-        <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
-          <div class="border-b border-slate-100 px-5 py-4">
+        <div class="overflow-hidden rounded-lg border border-blue-100 bg-white shadow-sm shadow-blue-100/50">
+          <div class="border-b border-blue-100 bg-blue-50/70 px-5 py-4">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 class="text-base font-semibold text-slate-950">Task History</h2>
-                <p class="mt-1 text-sm text-slate-500">Recent research tasks from MySQL</p>
+                <h2 class="text-base font-semibold text-blue-950">任务历史</h2>
+                <p class="mt-1 text-sm text-slate-500">最近创建的研究任务</p>
               </div>
               <button
                 type="button"
@@ -310,7 +304,7 @@
                 @click="loadTasks"
               >
                 <RefreshCwIcon class="h-4 w-4" :class="isLoadingTasks ? 'animate-spin' : ''" aria-hidden="true" />
-                Refresh
+                刷新
               </button>
             </div>
             <div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_10rem]">
@@ -318,7 +312,7 @@
                 v-model="taskKeyword"
                 type="search"
                 class="min-h-10 rounded-lg border border-slate-200 px-3 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
-                placeholder="Search query..."
+                placeholder="搜索研究问题..."
                 @keyup.enter="loadTasks"
               />
               <select
@@ -326,17 +320,17 @@
                 class="min-h-10 rounded-lg border border-slate-200 px-3 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
                 @change="loadTasks"
               >
-                <option value="">All status</option>
-                <option value="RUNNING">RUNNING</option>
-                <option value="COMPLETED">COMPLETED</option>
-                <option value="FAILED">FAILED</option>
+                <option value="">全部状态</option>
+                <option value="RUNNING">运行中</option>
+                <option value="COMPLETED">已完成</option>
+                <option value="FAILED">失败</option>
               </select>
             </div>
           </div>
 
           <div class="divide-y divide-slate-100">
             <div v-if="taskError" class="px-5 py-4 text-sm text-rose-700">{{ taskError }}</div>
-            <div v-else-if="isLoadingTasks" class="px-5 py-8 text-sm text-slate-500">Loading tasks...</div>
+            <div v-else-if="isLoadingTasks" class="px-5 py-8 text-sm text-slate-500">正在加载任务...</div>
             <button
               v-for="task in tasks"
               :key="task.id"
@@ -351,67 +345,67 @@
                   <p class="mt-1 text-xs text-slate-500">{{ task.threadId }}</p>
                 </div>
                 <span class="shrink-0 rounded-md px-2 py-1 text-[11px] font-semibold ring-1" :class="statusStyles(task.status)">
-                  {{ task.status }}
+                  {{ statusLabel(task.status) }}
                 </span>
               </div>
               <div class="mt-3 flex flex-wrap gap-2 text-xs text-slate-500">
-                <span>{{ task.searchMode }}</span>
-                <span>revision {{ task.revisionNumber }}</span>
+                <span>{{ searchModeLabel(task.searchMode) }}</span>
+                <span>第 {{ task.revisionNumber }} 版</span>
                 <span>{{ formatDate(task.updatedAt || task.createdAt) }}</span>
               </div>
             </button>
             <div v-if="!isLoadingTasks && tasks.length === 0" class="px-5 py-8 text-sm text-slate-500">
-              No task records found.
+              暂无任务记录。
             </div>
           </div>
         </div>
       </section>
 
       <section class="space-y-6 lg:col-span-7">
-        <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
-          <div class="border-b border-slate-100 px-5 py-4">
-            <h2 class="text-base font-semibold text-slate-950">Task Detail</h2>
-            <p class="mt-1 text-sm text-slate-500">Selected task metadata and execution timeline</p>
+        <div class="overflow-hidden rounded-lg border border-blue-100 bg-white shadow-sm shadow-blue-100/50">
+          <div class="border-b border-blue-100 bg-blue-50/70 px-5 py-4">
+            <h2 class="text-base font-semibold text-blue-950">任务详情</h2>
+            <p class="mt-1 text-sm text-slate-500">查看所选任务的基础信息与执行过程</p>
           </div>
           <div v-if="selectedTask" class="p-5">
             <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Task ID</dt>
+                <dt class="text-xs font-medium tracking-wide text-slate-400">任务 ID</dt>
                 <dd class="mt-1 text-sm font-semibold text-slate-950">#{{ selectedTask.id }}</dd>
               </div>
               <div>
-                <dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Status</dt>
-                <dd class="mt-1"><span class="rounded-md px-2 py-1 text-xs font-semibold ring-1" :class="statusStyles(selectedTask.status)">{{ selectedTask.status }}</span></dd>
+                <dt class="text-xs font-medium tracking-wide text-slate-400">状态</dt>
+                <dd class="mt-1"><span class="rounded-md px-2 py-1 text-xs font-semibold ring-1" :class="statusStyles(selectedTask.status)">{{ statusLabel(selectedTask.status) }}</span></dd>
               </div>
               <div class="sm:col-span-2">
-                <dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Query</dt>
+                <dt class="text-xs font-medium tracking-wide text-slate-400">研究问题</dt>
                 <dd class="mt-1 text-sm leading-6 text-slate-700">{{ selectedTask.query }}</dd>
               </div>
             </dl>
           </div>
-          <div v-else class="p-5 text-sm text-slate-500">Select a task to inspect details.</div>
+          <div v-else class="p-5 text-sm text-slate-500">请选择一个任务查看详情。</div>
         </div>
 
-        <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
-          <div class="border-b border-slate-100 px-5 py-4">
-            <h2 class="text-base font-semibold text-slate-950">Agent Timeline</h2>
-            <p class="mt-1 text-sm text-slate-500">What each node wrote into the step log</p>
+        <div class="overflow-hidden rounded-lg border border-blue-100 bg-white shadow-sm shadow-blue-100/50">
+          <div class="border-b border-blue-100 bg-blue-50/70 px-5 py-4">
+            <h2 class="text-base font-semibold text-blue-950">智能体时间线</h2>
+            <p class="mt-1 text-sm text-slate-500">各节点写入的执行日志</p>
           </div>
           <ol class="divide-y divide-slate-100">
             <li v-for="log in taskLogs" :key="log.id" class="px-5 py-4">
               <div class="flex items-start justify-between gap-4">
                 <div>
-                  <p class="text-sm font-semibold text-slate-950">{{ log.stepName }}</p>
+                  <p class="text-sm font-semibold text-slate-950">{{ stepNameLabel(log.stepName) }}</p>
                   <p class="mt-1 text-xs text-slate-500">{{ formatDate(log.createdAt) }}</p>
                 </div>
                 <span class="rounded-md px-2 py-1 text-[11px] font-semibold ring-1" :class="statusStyles(log.status)">
-                  {{ log.status }}
+                  {{ statusLabel(log.status) }}
                 </span>
               </div>
               <pre class="mt-3 max-h-40 overflow-auto rounded-lg bg-slate-950 p-3 text-xs leading-5 text-slate-200">{{ log.errorMessage || log.outputSnapshot }}</pre>
             </li>
             <li v-if="taskLogs.length === 0" class="px-5 py-8 text-sm text-slate-500">
-              No logs for the selected task.
+              当前任务暂无日志。
             </li>
           </ol>
         </div>
@@ -420,23 +414,23 @@
 
     <main v-else-if="activeWorkspace === 'reports'" class="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-6 sm:px-6 lg:grid-cols-12 lg:px-8">
       <section class="lg:col-span-4">
-        <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
-          <div class="border-b border-slate-100 px-5 py-4">
+        <div class="overflow-hidden rounded-lg border border-blue-100 bg-white shadow-sm shadow-blue-100/50">
+          <div class="border-b border-blue-100 bg-blue-50/70 px-5 py-4">
             <div class="flex items-center justify-between gap-3">
               <div>
-                <h2 class="text-base font-semibold text-slate-950">{{ reportScope === 'library' ? 'Report Library' : 'Report Versions' }}</h2>
-                <p class="mt-1 text-sm text-slate-500">{{ reportScope === 'library' ? 'All saved reports for current user' : `Current thread: ${activeThreadId}` }}</p>
+                <h2 class="text-base font-semibold text-blue-950">{{ reportScope === 'library' ? '报告库' : '报告版本' }}</h2>
+                <p class="mt-1 text-sm text-slate-500">{{ reportScope === 'library' ? '当前用户保存的全部报告' : `当前会话：${activeThreadId}` }}</p>
               </div>
-              <button type="button" class="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-50" @click="loadReports(activeThreadId)" aria-label="Refresh reports">
+              <button type="button" class="rounded-lg border border-blue-100 bg-white p-2 text-slate-600 transition hover:bg-blue-50 hover:text-blue-700" @click="loadReports(activeThreadId)" aria-label="刷新报告">
                 <RefreshCwIcon class="h-4 w-4" :class="isLoadingReports ? 'animate-spin' : ''" aria-hidden="true" />
               </button>
             </div>
-            <div class="mt-4 grid grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-slate-50 p-1">
+            <div class="mt-4 grid grid-cols-2 gap-2 rounded-lg border border-blue-100 bg-white/80 p-1">
               <button type="button" class="min-h-9 rounded-md text-sm font-semibold transition" :class="reportScope === 'thread' ? 'bg-white text-blue-800 shadow-sm' : 'text-slate-600 hover:bg-white/70'" @click="switchReportScope('thread')">
-                Thread
+                当前会话
               </button>
               <button type="button" class="min-h-9 rounded-md text-sm font-semibold transition" :class="reportScope === 'library' ? 'bg-white text-blue-800 shadow-sm' : 'text-slate-600 hover:bg-white/70'" @click="switchReportScope('library')">
-                Library
+                报告库
               </button>
             </div>
             <div v-if="reportScope === 'library'" class="mt-3 space-y-3">
@@ -444,12 +438,12 @@
                 v-model="reportKeyword"
                 type="search"
                 class="min-h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
-                placeholder="Search reports..."
+                placeholder="搜索报告..."
                 @keyup.enter="loadReports(activeThreadId)"
               />
               <label class="flex items-center gap-2 text-sm font-medium text-slate-600">
                 <input v-model="favoriteOnly" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-600" @change="loadReports(activeThreadId)" />
-                Favorites only
+                仅看收藏
               </label>
             </div>
           </div>
@@ -465,9 +459,9 @@
               @click="selectReport(report)"
             >
               <div class="flex items-center justify-between gap-3">
-                <span class="text-sm font-semibold text-slate-950">Version {{ report.version }}</span>
+                <span class="text-sm font-semibold text-slate-950">版本 {{ report.version }}</span>
                 <span class="rounded-md px-2 py-1 text-[11px] font-semibold ring-1" :class="statusStyles(report.reviewStatus)">
-                  {{ report.reviewStatus }}
+                  {{ statusLabel(report.reviewStatus) }}
                 </span>
               </div>
               <div class="mt-2 flex items-center justify-between gap-3 text-xs text-slate-500">
@@ -477,31 +471,31 @@
               <p class="mt-1 text-xs text-slate-500">{{ formatDate(report.createdAt) }}</p>
             </button>
             <div v-if="!isLoadingReports && reports.length === 0" class="px-5 py-8 text-sm text-slate-500">
-              No reports found.
+              暂无报告。
             </div>
           </div>
         </div>
       </section>
 
       <section class="lg:col-span-8">
-        <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
-          <div class="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="overflow-hidden rounded-lg border border-blue-100 bg-white shadow-sm shadow-blue-100/50">
+          <div class="flex flex-col gap-3 border-b border-blue-100 bg-blue-50/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 class="text-base font-semibold text-slate-950">Report Preview</h2>
-              <p class="mt-1 text-sm text-slate-500">Review, export, or start a revision from this version</p>
+              <h2 class="text-base font-semibold text-blue-950">报告预览</h2>
+              <p class="mt-1 text-sm text-slate-500">查看、导出，或基于当前版本继续修订</p>
             </div>
             <div class="flex flex-wrap gap-2">
               <button type="button" class="flex min-h-9 items-center gap-2 rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-45" :disabled="!selectedReport" @click="copySelectedReport">
                 <CopyIcon class="h-4 w-4" aria-hidden="true" />
-                Copy
+                复制
               </button>
               <button type="button" class="flex min-h-9 items-center gap-2 rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-45" :disabled="!selectedReport" @click="toggleFavoriteSelectedReport">
                 <StarIcon class="h-4 w-4" :class="selectedReport?.favorite ? 'fill-amber-400 text-amber-500' : ''" aria-hidden="true" />
-                {{ selectedReport?.favorite ? 'Saved' : 'Save' }}
+                {{ selectedReport?.favorite ? '已收藏' : '收藏' }}
               </button>
               <button type="button" class="flex min-h-9 items-center gap-2 rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-45" :disabled="!selectedReport" @click="indexSelectedReport">
                 <BookOpenIcon class="h-4 w-4" aria-hidden="true" />
-                Add to RAG
+                加入 RAG
               </button>
               <button type="button" class="flex min-h-9 items-center gap-2 rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-45" :disabled="!selectedReport" @click="downloadSelectedReport('pdf')">
                 <DownloadIcon class="h-4 w-4" aria-hidden="true" />
@@ -517,11 +511,11 @@
               </button>
               <button type="button" class="flex min-h-9 items-center gap-2 rounded-lg border border-rose-200 px-3 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 disabled:opacity-45" :disabled="!selectedReport" @click="deleteSelectedReport">
                 <Trash2Icon class="h-4 w-4" aria-hidden="true" />
-                Delete
+                删除
               </button>
               <button type="button" class="flex min-h-9 items-center gap-2 rounded-lg bg-blue-700 px-3 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:bg-slate-300" :disabled="!selectedReport" @click="reviseSelectedReport">
                 <EyeIcon class="h-4 w-4" aria-hidden="true" />
-                Revise
+                修订
               </button>
             </div>
           </div>
@@ -530,7 +524,7 @@
               <div v-html="md.render(selectedReport.content || '')"></div>
             </article>
             <div v-else class="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-6 py-16 text-center text-sm text-slate-500">
-              Select a report version to preview.
+              请选择一个报告版本进行预览。
             </div>
           </div>
         </div>
@@ -539,13 +533,13 @@
 
     <main v-else-if="activeWorkspace === 'admin'" class="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-6 sm:px-6 lg:grid-cols-12 lg:px-8">
       <section class="space-y-6 lg:col-span-4">
-        <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
-          <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div class="overflow-hidden rounded-lg border border-blue-100 bg-white shadow-sm shadow-blue-100/50">
+          <div class="flex items-center justify-between border-b border-blue-100 bg-blue-50/70 px-5 py-4">
             <div>
-              <h2 class="text-base font-semibold text-slate-950">Admin Console</h2>
-              <p class="mt-1 text-sm text-slate-500">Cross-user operations and system status</p>
+              <h2 class="text-base font-semibold text-blue-950">管理控制台</h2>
+              <p class="mt-1 text-sm text-slate-500">跨用户管理与系统状态</p>
             </div>
-            <button type="button" class="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-50" @click="loadAdminDashboard" aria-label="Refresh admin dashboard">
+            <button type="button" class="rounded-lg border border-blue-100 bg-white p-2 text-slate-600 transition hover:bg-blue-50 hover:text-blue-700" @click="loadAdminDashboard" aria-label="刷新管理控制台">
               <RefreshCwIcon class="h-4 w-4" :class="isLoadingAdmin ? 'animate-spin' : ''" aria-hidden="true" />
             </button>
           </div>
@@ -553,17 +547,17 @@
           <div class="grid grid-cols-1 divide-y divide-slate-100">
             <div v-for="(status, name) in adminHealth" :key="name" class="flex items-center justify-between px-5 py-3">
               <span class="text-sm font-medium capitalize text-slate-700">{{ name }}</span>
-              <span class="rounded-md px-2 py-1 text-[11px] font-semibold ring-1" :class="statusStyles(status)">{{ status }}</span>
+              <span class="rounded-md px-2 py-1 text-[11px] font-semibold ring-1" :class="statusStyles(status)">{{ statusLabel(status) }}</span>
             </div>
           </div>
         </div>
 
-        <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
-          <div class="border-b border-slate-100 px-5 py-4">
-            <h2 class="text-base font-semibold text-slate-950">Users</h2>
+        <div class="overflow-hidden rounded-lg border border-blue-100 bg-white shadow-sm shadow-blue-100/50">
+          <div class="border-b border-blue-100 bg-blue-50/70 px-5 py-4">
+            <h2 class="text-base font-semibold text-blue-950">用户管理</h2>
             <div class="mt-3 flex gap-2">
-              <input v-model="adminUserKeyword" type="search" class="min-h-10 min-w-0 flex-1 rounded-lg border border-slate-200 px-3 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" placeholder="Search users..." @keyup.enter="loadAdminUsers" />
-              <button type="button" class="rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50" @click="loadAdminUsers">Search</button>
+              <input v-model="adminUserKeyword" type="search" class="min-h-10 min-w-0 flex-1 rounded-lg border border-blue-100 px-3 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" placeholder="搜索用户..." @keyup.enter="loadAdminUsers" />
+              <button type="button" class="rounded-lg border border-blue-100 bg-white px-3 text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700" @click="loadAdminUsers">搜索</button>
             </div>
           </div>
           <div class="divide-y divide-slate-100">
@@ -573,54 +567,54 @@
                   <p class="truncate text-sm font-semibold text-slate-950">{{ user.username }}</p>
                   <p class="mt-1 text-xs text-slate-500">{{ user.email || '-' }}</p>
                 </div>
-                <span class="rounded-md px-2 py-1 text-[11px] font-semibold ring-1" :class="statusStyles(user.status)">{{ user.status }}</span>
+                <span class="rounded-md px-2 py-1 text-[11px] font-semibold ring-1" :class="statusStyles(user.status)">{{ statusLabel(user.status) }}</span>
               </div>
               <div class="mt-3 grid grid-cols-2 gap-2">
                 <select :value="user.role" class="min-h-9 rounded-lg border border-slate-200 px-2 text-sm" @change="changeAdminUserRole(user, $event.target.value)">
-                  <option value="USER">USER</option>
-                  <option value="ADMIN">ADMIN</option>
+                  <option value="USER">普通用户</option>
+                  <option value="ADMIN">管理员</option>
                 </select>
                 <select :value="user.status" class="min-h-9 rounded-lg border border-slate-200 px-2 text-sm" @change="changeAdminUserStatus(user, $event.target.value)">
-                  <option value="ACTIVE">ACTIVE</option>
-                  <option value="DISABLED">DISABLED</option>
+                  <option value="ACTIVE">启用</option>
+                  <option value="DISABLED">停用</option>
                 </select>
               </div>
             </div>
-            <div v-if="adminUsers.length === 0" class="px-5 py-8 text-sm text-slate-500">No users found.</div>
+            <div v-if="adminUsers.length === 0" class="px-5 py-8 text-sm text-slate-500">暂无用户。</div>
           </div>
         </div>
       </section>
 
       <section class="space-y-6 lg:col-span-8">
-        <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
-          <div class="border-b border-slate-100 px-5 py-4">
+        <div class="overflow-hidden rounded-lg border border-blue-100 bg-white shadow-sm shadow-blue-100/50">
+          <div class="border-b border-blue-100 bg-blue-50/70 px-5 py-4">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 class="text-base font-semibold text-slate-950">Global Tasks</h2>
-                <p class="mt-1 text-sm text-slate-500">Cross-user task monitoring</p>
+                <h2 class="text-base font-semibold text-blue-950">全局任务</h2>
+                <p class="mt-1 text-sm text-slate-500">跨用户任务监控</p>
               </div>
-              <button type="button" class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" @click="loadAdminTasks">Refresh</button>
+              <button type="button" class="rounded-lg border border-blue-100 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700" @click="loadAdminTasks">刷新</button>
             </div>
             <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
-              <input v-model="adminTaskKeyword" type="search" class="min-h-10 rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" placeholder="Keyword" @keyup.enter="loadAdminTasks" />
-              <input v-model="adminTaskOwnerId" type="number" class="min-h-10 rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" placeholder="Owner ID" @keyup.enter="loadAdminTasks" />
-              <select v-model="adminTaskStatus" class="min-h-10 rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" @change="loadAdminTasks">
-                <option value="">All status</option>
-                <option value="RUNNING">RUNNING</option>
-                <option value="COMPLETED">COMPLETED</option>
-                <option value="FAILED">FAILED</option>
+              <input v-model="adminTaskKeyword" type="search" class="min-h-10 rounded-lg border border-blue-100 px-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" placeholder="关键词" @keyup.enter="loadAdminTasks" />
+              <input v-model="adminTaskOwnerId" type="number" class="min-h-10 rounded-lg border border-blue-100 px-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" placeholder="用户 ID" @keyup.enter="loadAdminTasks" />
+              <select v-model="adminTaskStatus" class="min-h-10 rounded-lg border border-blue-100 px-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" @change="loadAdminTasks">
+                <option value="">全部状态</option>
+                <option value="RUNNING">运行中</option>
+                <option value="COMPLETED">已完成</option>
+                <option value="FAILED">失败</option>
               </select>
             </div>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full min-w-[760px] text-left text-sm">
-              <thead class="border-b border-slate-100 bg-slate-50 text-xs uppercase text-slate-500">
+              <thead class="border-b border-blue-100 bg-blue-50 text-xs text-slate-500">
                 <tr>
-                  <th class="px-5 py-3">Task</th>
-                  <th class="px-5 py-3">Owner</th>
-                  <th class="px-5 py-3">Status</th>
-                  <th class="px-5 py-3">Updated</th>
-                  <th class="px-5 py-3">Logs</th>
+                  <th class="px-5 py-3">任务</th>
+                  <th class="px-5 py-3">用户</th>
+                  <th class="px-5 py-3">状态</th>
+                  <th class="px-5 py-3">更新时间</th>
+                  <th class="px-5 py-3">日志</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
@@ -630,58 +624,58 @@
                     <p class="mt-1 text-xs text-slate-500">{{ task.threadId }}</p>
                   </td>
                   <td class="px-5 py-4 text-slate-600">{{ task.ownerUsername }} #{{ task.ownerId }}</td>
-                  <td class="px-5 py-4"><span class="rounded-md px-2 py-1 text-[11px] font-semibold ring-1" :class="statusStyles(task.status)">{{ task.status }}</span></td>
+                  <td class="px-5 py-4"><span class="rounded-md px-2 py-1 text-[11px] font-semibold ring-1" :class="statusStyles(task.status)">{{ statusLabel(task.status) }}</span></td>
                   <td class="px-5 py-4 text-slate-500">{{ formatDate(task.updatedAt) }}</td>
-                  <td class="px-5 py-4"><button type="button" class="text-sm font-semibold text-blue-700 hover:text-blue-900" @click="loadAdminTaskLogs(task)">View</button></td>
+                  <td class="px-5 py-4"><button type="button" class="text-sm font-semibold text-blue-700 hover:text-blue-900" @click="loadAdminTaskLogs(task)">查看</button></td>
                 </tr>
-                <tr v-if="adminTasks.length === 0"><td colspan="5" class="px-5 py-8 text-sm text-slate-500">No tasks found.</td></tr>
+                <tr v-if="adminTasks.length === 0"><td colspan="5" class="px-5 py-8 text-sm text-slate-500">暂无任务。</td></tr>
               </tbody>
             </table>
           </div>
           <div v-if="adminSelectedTask" class="border-t border-slate-100 px-5 py-4">
-            <h3 class="text-sm font-semibold text-slate-950">Logs for task #{{ adminSelectedTask.id }}</h3>
+            <h3 class="text-sm font-semibold text-blue-950">任务 #{{ adminSelectedTask.id }} 的日志</h3>
             <div class="mt-3 max-h-56 space-y-2 overflow-auto">
-              <pre v-for="log in adminTaskLogs" :key="log.id" class="rounded-lg bg-slate-950 p-3 text-xs leading-5 text-slate-200">{{ log.stepName }} · {{ log.status }}\n{{ log.errorMessage || log.outputSnapshot }}</pre>
+              <pre v-for="log in adminTaskLogs" :key="log.id" class="rounded-lg bg-slate-950 p-3 text-xs leading-5 text-slate-200">{{ stepNameLabel(log.stepName) }} · {{ statusLabel(log.status) }}\n{{ log.errorMessage || log.outputSnapshot }}</pre>
             </div>
           </div>
         </div>
 
-        <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
-          <div class="border-b border-slate-100 px-5 py-4">
+        <div class="overflow-hidden rounded-lg border border-blue-100 bg-white shadow-sm shadow-blue-100/50">
+          <div class="border-b border-blue-100 bg-blue-50/70 px-5 py-4">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 class="text-base font-semibold text-slate-950">Global Reports</h2>
-                <p class="mt-1 text-sm text-slate-500">Cross-user report governance</p>
+                <h2 class="text-base font-semibold text-blue-950">全局报告</h2>
+                <p class="mt-1 text-sm text-slate-500">跨用户报告管理</p>
               </div>
-              <button type="button" class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" @click="loadAdminReports">Refresh</button>
+              <button type="button" class="rounded-lg border border-blue-100 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700" @click="loadAdminReports">刷新</button>
             </div>
             <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <input v-model="adminReportKeyword" type="search" class="min-h-10 rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" placeholder="Keyword" @keyup.enter="loadAdminReports" />
-              <input v-model="adminReportOwnerId" type="number" class="min-h-10 rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" placeholder="Owner ID" @keyup.enter="loadAdminReports" />
+              <input v-model="adminReportKeyword" type="search" class="min-h-10 rounded-lg border border-blue-100 px-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" placeholder="关键词" @keyup.enter="loadAdminReports" />
+              <input v-model="adminReportOwnerId" type="number" class="min-h-10 rounded-lg border border-blue-100 px-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" placeholder="用户 ID" @keyup.enter="loadAdminReports" />
             </div>
           </div>
           <div class="divide-y divide-slate-100">
             <div v-for="report in adminReports" :key="report.id" class="px-5 py-4">
               <div class="flex items-start justify-between gap-4">
                 <div class="min-w-0">
-                  <p class="truncate text-sm font-semibold text-slate-950">{{ report.threadId }} · v{{ report.version }}</p>
+                  <p class="truncate text-sm font-semibold text-slate-950">{{ report.threadId }} · 版本 {{ report.version }}</p>
                   <p class="mt-1 text-xs text-slate-500">{{ report.ownerUsername }} #{{ report.ownerId }} · {{ formatDate(report.createdAt) }}</p>
                 </div>
-                <button type="button" class="rounded-lg border border-rose-200 px-3 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50" @click="deleteAdminReport(report)">Delete</button>
+                <button type="button" class="rounded-lg border border-rose-200 px-3 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50" @click="deleteAdminReport(report)">删除</button>
               </div>
               <p class="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">{{ report.content }}</p>
             </div>
-            <div v-if="adminReports.length === 0" class="px-5 py-8 text-sm text-slate-500">No reports found.</div>
+            <div v-if="adminReports.length === 0" class="px-5 py-8 text-sm text-slate-500">暂无报告。</div>
           </div>
         </div>
       </section>
     </main>
 
     <main v-else class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <section class="rounded-lg border border-slate-200 bg-white shadow-sm">
-        <div class="border-b border-slate-100 px-5 py-4">
-          <h2 class="text-base font-semibold text-slate-950">System Configuration</h2>
-          <p class="mt-1 text-sm text-slate-500">Frontend visibility for backend dependencies and fallback behavior</p>
+      <section class="overflow-hidden rounded-lg border border-blue-100 bg-white shadow-sm shadow-blue-100/50">
+        <div class="border-b border-blue-100 bg-blue-50/70 px-5 py-4">
+          <h2 class="text-base font-semibold text-blue-950">系统配置</h2>
+          <p class="mt-1 text-sm text-slate-500">展示后端依赖与降级策略的当前状态</p>
         </div>
         <div class="grid grid-cols-1 divide-y divide-slate-100 lg:grid-cols-2 lg:divide-x lg:divide-y-0">
           <div v-for="item in configItems" :key="item.name" class="flex gap-4 p-5">
@@ -832,22 +826,22 @@ const adminReportKeyword = ref('');
 const adminReportOwnerId = ref('');
 
 const configItems = computed(() => [
-    { name: 'LLM Provider', status: 'Configured by backend', desc: 'OpenAI-compatible chat model with local fallback', icon: ServerIcon },
-    { name: 'Tavily Search', status: 'Optional key', desc: 'Web search source with fallback result when key is missing', icon: Globe2Icon },
-    { name: 'MySQL', status: 'Required', desc: 'Task, log, report and checkpoint persistence', icon: DatabaseIcon },
-    { name: 'Redis', status: 'Optional runtime cache', desc: 'Running task state and latest SSE event cache', icon: LayersIcon },
-    { name: 'ChromaDB', status: 'Optional vector store', desc: 'Vector RAG store with local in-memory fallback', icon: SearchIcon }
+    { name: 'LLM 服务', status: '后端配置', desc: '兼容 OpenAI 的对话模型，缺失时使用本地降级逻辑。', icon: ServerIcon },
+    { name: 'Tavily 搜索', status: '可选密钥', desc: '联网检索来源；未配置密钥时返回降级结果。', icon: Globe2Icon },
+    { name: 'MySQL', status: '必需', desc: '持久化任务、日志、报告和检查点数据。', icon: DatabaseIcon },
+    { name: 'Redis', status: '可选缓存', desc: '缓存运行中任务状态和最新 SSE 事件。', icon: LayersIcon },
+    { name: 'ChromaDB', status: '可选向量库', desc: '向量 RAG 存储；不可用时回退到本地内存实现。', icon: SearchIcon }
 ]);
 
 const workspaceTabs = computed(() => {
     const tabs = [
-        { id: 'run', label: 'Run', icon: SendIcon },
-        { id: 'tasks', label: 'Tasks', icon: ClipboardListIcon },
-        { id: 'reports', label: 'Reports', icon: HistoryIcon },
-        { id: 'settings', label: 'Settings', icon: SettingsIcon }
+        { id: 'run', label: '运行', icon: SendIcon },
+        { id: 'tasks', label: '任务', icon: ClipboardListIcon },
+        { id: 'reports', label: '报告', icon: HistoryIcon },
+        { id: 'settings', label: '设置', icon: SettingsIcon }
     ];
     if (authUser.value?.role === 'ADMIN') {
-        tabs.splice(3, 0, { id: 'admin', label: 'Admin', icon: ShieldCheckIcon });
+        tabs.splice(3, 0, { id: 'admin', label: '管理', icon: ShieldCheckIcon });
     }
     return tabs;
 });
@@ -921,20 +915,20 @@ const handleDrop = async (event) => {
 
 const processFiles = async (files) => {
     if (files.length > 5) {
-        alert("Maximum 5 files allowed!");
+        alert('最多只能上传 5 个文件。');
         return;
     }
 
     uploadedFiles.value = Array.from(files);
 
     if (uploadedFiles.value.length > 0) {
-        logs.value.push(`[SYSTEM] Uploading ${files.length} document(s)...`);
+        logs.value.push(`[系统] 正在上传 ${files.length} 个文档...`);
         try {
             const res = await uploadFiles(uploadedFiles.value);
-            logs.value.push(`[SYSTEM] Knowledge base built. ${res.chunks_stored} chunks indexed.`);
+            logs.value.push(`[系统] 知识库已构建，已索引 ${res.chunks_stored} 个文本块。`);
         } catch (e) {
-            logs.value.push(`[ERROR] Upload failed: ${e.message}`);
-            alert("Upload failed: " + e.message);
+            logs.value.push(`[错误] 上传失败：${e.message}`);
+            alert(`上传失败：${e.message}`);
             uploadedFiles.value = [];
         }
     }
@@ -942,6 +936,55 @@ const processFiles = async (files) => {
 
 const setMode = (mode) => {
     searchMode.value = mode;
+};
+
+const statusLabel = (status) => {
+    const value = (status || '').toUpperCase();
+    const labels = {
+        RUNNING: '运行中',
+        COMPLETED: '已完成',
+        FAILED: '失败',
+        SUCCESS: '成功',
+        PASS: '通过',
+        FAIL: '未通过',
+        ACTIVE: '启用',
+        DISABLED: '停用',
+        READY: '就绪',
+        OK: '正常'
+    };
+    return labels[value] || status || '-';
+};
+
+const searchModeLabel = (mode) => {
+    const value = (mode || '').toLowerCase();
+    if (value === 'document') return '仅文档';
+    if (value === 'hybrid') return '混合检索';
+    return mode || '-';
+};
+
+const currentStepLabel = (step) => {
+    const labels = {
+        idle: '就绪',
+        planner: '规划中',
+        researcher: '检索中',
+        writer: '撰写中',
+        reviewer: '质检中',
+        refiner: '修订中',
+        done: '已完成'
+    };
+    return labels[step] || step || '-';
+};
+
+const stepNameLabel = (step) => {
+    const value = (step || '').toLowerCase();
+    const labels = {
+        planner: '规划',
+        researcher: '检索',
+        writer: '撰写',
+        reviewer: '质检',
+        refiner: '修订'
+    };
+    return labels[value] || step || '-';
 };
 
 const formatDate = (value) => {
@@ -1034,7 +1077,7 @@ const reviseSelectedReport = () => {
 const copySelectedReport = async () => {
     if (!selectedReport.value?.content) return;
     await navigator.clipboard.writeText(selectedReport.value.content);
-    logs.value.push('[SYSTEM] Report copied to clipboard.');
+    logs.value.push('[系统] 报告已复制到剪贴板。');
 };
 
 const downloadSelectedReport = async (format = 'pdf') => {
@@ -1047,7 +1090,7 @@ const downloadSelectedReport = async (format = 'pdf') => {
         link.download = result.filename;
         link.click();
         URL.revokeObjectURL(url);
-        logs.value.push(`[SYSTEM] Report exported as ${format.toUpperCase()}.`);
+        logs.value.push(`[系统] 报告已导出为 ${format.toUpperCase()}。`);
     } catch (error) {
         triggerWarning(error.message);
     }
@@ -1068,7 +1111,7 @@ const indexSelectedReport = async () => {
     if (!selectedReport.value) return;
     try {
         const result = await indexReportToKnowledgeBase(selectedReport.value.id);
-        logs.value.push(`[SYSTEM] Report indexed to RAG. Chunks: ${result.chunksStored}`);
+        logs.value.push(`[系统] 报告已加入 RAG 知识库，文本块数量：${result.chunksStored}。`);
         selectedReport.value = await getReport(selectedReport.value.id);
         reports.value = reports.value.map((report) => report.id === selectedReport.value.id ? selectedReport.value : report);
     } catch (error) {
@@ -1078,7 +1121,7 @@ const indexSelectedReport = async () => {
 
 const deleteSelectedReport = async () => {
     if (!selectedReport.value) return;
-    const confirmed = window.confirm('Delete this report from the library?');
+    const confirmed = window.confirm('确定要从报告库删除这份报告吗？');
     if (!confirmed) return;
     try {
         await deleteReportApi(selectedReport.value.id);
@@ -1157,7 +1200,7 @@ const loadAdminReports = async () => {
 };
 
 const deleteAdminReport = async (report) => {
-    const confirmed = window.confirm(`Delete report #${report.id}?`);
+    const confirmed = window.confirm(`确定要删除报告 #${report.id} 吗？`);
     if (!confirmed) return;
     try {
         await adminDeleteReport(report.id);
@@ -1195,20 +1238,20 @@ const startResearch = async () => {
     currentStep.value = 'planner';
     completedSteps.value = [];
     logs.value = [];
-    logs.value.push(`[INIT] System initialized. Mode: ${searchMode.value.toUpperCase()}`);
+    logs.value.push(`[初始化] 系统已就绪，检索模式：${searchModeLabel(searchMode.value)}`);
     displayedReport.value = '';
 
     const actualMode = uploadedFiles.value.length === 0 ? 'hybrid' : searchMode.value;
 
     try {
         if (uploadedFiles.value.length > 0) {
-            logs.value.push(`[SYSTEM] Uploading ${uploadedFiles.value.length} document(s)...`);
+            logs.value.push(`[系统] 正在上传 ${uploadedFiles.value.length} 个文档...`);
             const res = await uploadFiles(uploadedFiles.value);
-            logs.value.push(`[SYSTEM] Knowledge base built. ${res.chunks_stored} chunks indexed.`);
+            logs.value.push(`[系统] 知识库已构建，已索引 ${res.chunks_stored} 个文本块。`);
         } else {
-            logs.value.push(`[SYSTEM] Clearing previous knowledge base...`);
+            logs.value.push('[系统] 正在清理上一轮知识库上下文...');
             await clearContext();
-            logs.value.push(`[SYSTEM] Context cleared. Running in pure Web Search mode.`);
+            logs.value.push('[系统] 上下文已清理，将使用联网混合检索。');
         }
 
         streamChat(
@@ -1224,7 +1267,7 @@ const startResearch = async () => {
 
                     if (data.step === 'planner') {
                         const plan = data.data.plan || [];
-                        logs.value.push(`[PLANNER] Strategy: [${plan.join(', ')}]`);
+                        logs.value.push(`[规划] 检索策略：[${plan.join(', ')}]`);
                     }
 
                     else if (data.step === 'researcher') {
@@ -1233,7 +1276,7 @@ const startResearch = async () => {
 
                         if (resultsStr.includes("流程已终止")) {
                             triggerWarning("文档与问题无关，任务已强制停止");
-                            logs.value.push(`[SYSTEM] Task terminated: Context irrelevant in Doc-Only mode.`);
+                            logs.value.push('[系统] 任务已停止：仅文档模式下上下文与问题无关。');
                             currentStep.value = 'done';
                             return;
                         }
@@ -1244,11 +1287,11 @@ const startResearch = async () => {
                             triggerWarning("文档与问题无关，无法回答");
                         }
 
-                        logs.value.push(`[RESEARCHER] Data acquisition complete. Items: ${results.length}`);
+                        logs.value.push(`[检索] 证据收集完成，条目数：${results.length}`);
                     }
 
                     else if (data.step === 'writer') {
-                        logs.value.push(`[WRITER] Drafting content...`);
+                        logs.value.push('[撰写] 正在生成报告内容...');
                         const finalReport = data.data.final_report || data.data.finalReport;
                         if (finalReport) {
                             displayedReport.value = '';
@@ -1260,15 +1303,15 @@ const startResearch = async () => {
                         const reviewStatus = data.data.review_status || data.data.reviewStatus;
                         const critique = data.data.critique || '';
                         if (reviewStatus === 'FAIL') {
-                            logs.value.push(`[QA] Review FAILED: ${critique} -> Rerolling`);
+                            logs.value.push(`[质检] 未通过：${critique}，正在重新规划。`);
                             currentStep.value = 'planner';
                         } else {
-                            logs.value.push(`[QA] Review PASSED.`);
+                            logs.value.push('[质检] 已通过。');
                         }
                     }
                     else if (data.step === 'refiner') {
                         currentStep.value = 'refiner';
-                        logs.value.push(`[REFINER] Modifying report based on feedback...`);
+                        logs.value.push('[修订] 正在根据反馈调整报告...');
                         const finalReport = data.data.final_report || data.data.finalReport;
                         if (finalReport) {
                             displayedReport.value = '';
@@ -1281,22 +1324,22 @@ const startResearch = async () => {
             () => {
                 isLoading.value = false;
                 currentStep.value = 'done';
-                logs.value.push('[DONE] Process complete.');
+                logs.value.push('[完成] 研究流程已结束。');
                 loadTasks();
                 loadReports(activeThreadId.value);
                 scrollToBottom();
             },
             (err) => {
                 isLoading.value = false;
-                logs.value.push(`[ERROR] ${err.message}`);
+                logs.value.push(`[错误] ${err.message}`);
                 scrollToBottom();
             },
             activeThreadId.value
         );
     } catch (e) {
         isLoading.value = false;
-        logs.value.push(`[ERROR] Initialization failed: ${e.message}`);
-        alert("System Error: " + e.message);
+        logs.value.push(`[错误] 初始化失败：${e.message}`);
+        alert(`系统错误：${e.message}`);
     }
 };
 

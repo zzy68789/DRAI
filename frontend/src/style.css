@@ -5,13 +5,13 @@
 @tailwind utilities;
 
 html {
-  background: #f6f8fb;
+  background: #eaf4ff;
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  background: #f6f8fb;
+  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 46%, #e0f2fe 100%);
   font-family: theme('fontFamily.sans');
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

@@ -1,11 +1,11 @@
 <template>
-  <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm" aria-labelledby="agent-flow-title">
+  <section class="rounded-lg border border-blue-100 bg-white p-5 shadow-sm shadow-blue-100/50" aria-labelledby="agent-flow-title">
     <div class="mb-5 flex items-center justify-between gap-3">
       <div>
-        <h2 id="agent-flow-title" class="text-sm font-semibold text-slate-950">Agent Flow</h2>
-        <p class="mt-1 text-xs text-slate-500">LangGraph4j node execution</p>
+        <h2 id="agent-flow-title" class="text-sm font-semibold text-blue-950">智能体流程</h2>
+        <p class="mt-1 text-xs text-slate-500">研究任务的节点执行进度</p>
       </div>
-      <span class="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600">
+      <span class="rounded-md border border-blue-100 bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
         {{ statusLabel }}
       </span>
     </div>
@@ -66,11 +66,11 @@ const props = defineProps({
 });
 
 const steps = [
-  { id: 'planner', label: 'Planner', desc: 'Task decomposition and retrieval plan', icon: BrainCircuitIcon },
-  { id: 'researcher', label: 'Researcher', desc: 'Document retrieval and web evidence collection', icon: SearchIcon },
-  { id: 'writer', label: 'Writer', desc: 'Markdown report generation', icon: FileTextIcon },
-  { id: 'reviewer', label: 'Reviewer', desc: 'Quality check and retry decision', icon: ShieldCheckIcon },
-  { id: 'refiner', label: 'Refiner', desc: 'Follow-up report revision for same thread', icon: FilePenLineIcon, optional: true }
+  { id: 'planner', label: '规划', desc: '拆解任务并制定检索计划', icon: BrainCircuitIcon },
+  { id: 'researcher', label: '检索', desc: '收集文档证据和联网资料', icon: SearchIcon },
+  { id: 'writer', label: '撰写', desc: '生成 Markdown 研究报告', icon: FileTextIcon },
+  { id: 'reviewer', label: '质检', desc: '检查报告质量并决定是否重试', icon: ShieldCheckIcon },
+  { id: 'refiner', label: '修订', desc: '基于同一会话继续调整报告', icon: FilePenLineIcon, optional: true }
 ];
 
 const seenSteps = ref(new Set());
@@ -89,9 +89,9 @@ const currentStepIndex = computed(() => steps.findIndex((step) => step.id === pr
 const completedStepSet = computed(() => new Set([...props.completedSteps, ...seenSteps.value]));
 
 const statusLabel = computed(() => {
-  if (props.currentStep === 'idle') return 'Ready';
-  if (props.currentStep === 'done') return 'Complete';
-  return 'Running';
+  if (props.currentStep === 'idle') return '待开始';
+  if (props.currentStep === 'done') return '已完成';
+  return '进行中';
 });
 
 const isActive = (step) => props.currentStep === step.id;
@@ -103,16 +103,16 @@ const isCompleted = (step, index) => {
 };
 
 const getStepState = (step, index) => {
-  if (isActive(step)) return 'active';
-  if (isCompleted(step, index)) return 'done';
-  if (step.optional) return 'optional';
-  return 'idle';
+  if (isActive(step)) return '进行中';
+  if (isCompleted(step, index)) return '已完成';
+  if (step.optional) return '可选';
+  return '待开始';
 };
 
 const getMarkerStyles = (step, index) => {
   if (isActive(step)) return 'border-blue-700 bg-blue-700 text-white shadow-sm';
   if (isCompleted(step, index)) return 'border-emerald-600 bg-emerald-600 text-white';
-  return 'border-slate-200 bg-white text-slate-400';
+  return 'border-blue-100 bg-blue-50/60 text-slate-400';
 };
 
 const getTitleStyles = (step, index) => {

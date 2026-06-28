@@ -18,12 +18,12 @@ export const currentThreadId = SESSION_THREAD_ID;
 async function requestJson(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, withAuth(options));
   if (!response.ok) {
-      throw new Error(`Request failed: ${response.status}`);
+      throw new Error(`请求失败：${response.status}`);
   }
   const payload = await response.json();
   if (payload && typeof payload === 'object' && 'code' in payload) {
       if (payload.code !== 0) {
-          throw new Error(payload.message || 'Request failed');
+          throw new Error(payload.message || '请求失败');
       }
       return payload.data;
   }
@@ -89,7 +89,7 @@ export async function uploadFiles(files) {
     
     if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || "Upload failed");
+        throw new Error(errorData.detail || '上传失败');
     }
     
     return await response.json();
@@ -98,7 +98,7 @@ export async function clearContext() {
   const response = await fetch(`${API_BASE}/clear`, withAuth({
       method: "POST"
   }));
-  if (!response.ok) throw new Error("Failed to clear context");
+  if (!response.ok) throw new Error('清理上下文失败');
   return await response.json();
 }
 
@@ -139,7 +139,7 @@ export async function getReport(reportId) {
 export async function exportReport(reportId, format = 'pdf') {
   const response = await fetch(`${API_BASE}/reports/${reportId}/export?format=${encodeURIComponent(format)}`, withAuth());
   if (!response.ok) {
-      throw new Error(`Export failed: ${response.status}`);
+      throw new Error(`导出失败：${response.status}`);
   }
   const disposition = response.headers.get('Content-Disposition') || '';
   const filenameMatch = disposition.match(/filename="?([^"]+)"?/i);
@@ -237,7 +237,7 @@ export async function streamChat(query, search_mode, onData, onDone, onError, th
           }),
       }));
       
-      if (!response.ok) throw new Error('Network error');
+      if (!response.ok) throw new Error('网络异常，请稍后重试');
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
