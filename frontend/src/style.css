@@ -5,13 +5,17 @@
 @tailwind utilities;
 
 html {
-  background: #eaf4ff;
+  background: #eef7f5;
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 46%, #e0f2fe 100%);
+  background:
+    linear-gradient(90deg, rgba(15, 118, 110, 0.055) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.045) 1px, transparent 1px),
+    linear-gradient(135deg, #f8fafc 0%, #eef7f5 48%, #f4f1e8 100%);
+  background-size: 36px 36px, 36px 36px, auto;
   font-family: theme('fontFamily.sans');
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -21,4 +25,22 @@ button,
 textarea,
 input {
   font: inherit;
+}
+
+button,
+input,
+textarea,
+select {
+  letter-spacing: 0;
+}
+
+::selection {
+  background: #ccfbf1;
+  color: #042f2e;
+}
+
+.app-shell {
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.035), transparent 18rem),
+    transparent;
 }

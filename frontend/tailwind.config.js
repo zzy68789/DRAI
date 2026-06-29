@@ -6,6 +6,21 @@ export default {
   ],
   theme: {
     extend: {
+      colors: {
+        blue: {
+          50: '#edfdfa',
+          100: '#ccfbf1',
+          200: '#99f6e4',
+          300: '#5eead4',
+          400: '#2dd4bf',
+          500: '#14b8a6',
+          600: '#0d9488',
+          700: '#0f766e',
+          800: '#115e59',
+          900: '#134e4a',
+          950: '#042f2e',
+        },
+      },
       fontFamily: {
         // 现代无衬线字体栈：优先系统默认，保证清晰
         sans: [
@@ -24,8 +39,9 @@ export default {
           '"WenQuanYi Micro Hei"', 
           'sans-serif'
         ],
-        // 标题字体 (Orbitron 用于 Logo)
-        display: ['Orbitron', 'sans-serif'],
+        // 产品标题与关键数字使用更紧实的工程化字体栈
+        display: ['"IBM Plex Sans"', 'Inter', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'Menlo', 'Consolas', '"Courier New"', 'monospace'],
       },
       typography: {
         DEFAULT: {

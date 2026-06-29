@@ -1,16 +1,16 @@
 <template>
-  <section class="rounded-lg border border-blue-100 bg-white p-5 shadow-sm shadow-blue-100/50" aria-labelledby="agent-flow-title">
-    <div class="mb-5 flex items-center justify-between gap-3">
+  <section class="overflow-hidden rounded-lg border border-slate-800 bg-slate-950 shadow-sm shadow-slate-950/20" aria-labelledby="agent-flow-title">
+    <div class="flex items-center justify-between gap-3 border-b border-slate-800 bg-slate-900 px-5 py-4">
       <div>
-        <h2 id="agent-flow-title" class="text-sm font-semibold text-blue-950">智能体流程</h2>
-        <p class="mt-1 text-xs text-slate-500">研究任务的节点执行进度</p>
+        <h2 id="agent-flow-title" class="text-sm font-semibold text-white">Agent 执行轨迹</h2>
+        <p class="mt-1 text-xs text-slate-400">Planner → Researcher → Writer → Reviewer</p>
       </div>
-      <span class="rounded-md border border-blue-100 bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
+      <span class="rounded-md border border-blue-300/30 bg-blue-300/10 px-2 py-1 text-xs font-medium text-blue-100">
         {{ statusLabel }}
       </span>
     </div>
 
-    <ol class="relative space-y-4">
+    <ol class="relative space-y-4 px-5 py-5">
       <li
         v-for="(step, index) in steps"
         :key="step.id"
@@ -18,7 +18,7 @@
       >
         <div
           v-if="index !== steps.length - 1"
-          class="absolute left-4 top-8 h-[calc(100%+0.25rem)] w-px bg-slate-200"
+          class="absolute left-4 top-8 h-[calc(100%+0.25rem)] w-px bg-slate-700"
           aria-hidden="true"
         ></div>
 
@@ -34,14 +34,17 @@
 
         <div class="min-w-0 flex-1 pb-1">
           <div class="flex items-center justify-between gap-3">
-            <h3 class="truncate text-sm font-semibold" :class="getTitleStyles(step, index)">
-              {{ step.label }}
-            </h3>
+            <div class="min-w-0">
+              <p class="text-[11px] font-semibold uppercase text-slate-500">{{ step.code }}</p>
+              <h3 class="truncate text-sm font-semibold" :class="getTitleStyles(step, index)">
+                {{ step.label }}
+              </h3>
+            </div>
             <span class="shrink-0 text-[11px] font-medium uppercase tracking-wide" :class="getStateStyles(step, index)">
               {{ getStepState(step, index) }}
             </span>
           </div>
-          <p class="mt-1 text-xs leading-5 text-slate-500">{{ step.desc }}</p>
+          <p class="mt-1 text-xs leading-5 text-slate-400">{{ step.desc }}</p>
         </div>
       </li>
     </ol>
@@ -66,11 +69,11 @@ const props = defineProps({
 });
 
 const steps = [
-  { id: 'planner', label: '规划', desc: '拆解任务并制定检索计划', icon: BrainCircuitIcon },
-  { id: 'researcher', label: '检索', desc: '收集文档证据和联网资料', icon: SearchIcon },
-  { id: 'writer', label: '撰写', desc: '生成 Markdown 研究报告', icon: FileTextIcon },
-  { id: 'reviewer', label: '质检', desc: '检查报告质量并决定是否重试', icon: ShieldCheckIcon },
-  { id: 'refiner', label: '修订', desc: '基于同一会话继续调整报告', icon: FilePenLineIcon, optional: true }
+  { id: 'planner', code: 'PLAN', label: '规划', desc: '拆解任务并制定检索计划', icon: BrainCircuitIcon },
+  { id: 'researcher', code: 'EVIDENCE', label: '检索', desc: '收集文档证据和联网资料', icon: SearchIcon },
+  { id: 'writer', code: 'DRAFT', label: '撰写', desc: '生成 Markdown 研究报告', icon: FileTextIcon },
+  { id: 'reviewer', code: 'CHECK', label: '质检', desc: '检查报告质量并决定是否重试', icon: ShieldCheckIcon },
+  { id: 'refiner', code: 'REVISE', label: '修订', desc: '基于同一会话继续调整报告', icon: FilePenLineIcon, optional: true }
 ];
 
 const seenSteps = ref(new Set());
@@ -110,21 +113,21 @@ const getStepState = (step, index) => {
 };
 
 const getMarkerStyles = (step, index) => {
-  if (isActive(step)) return 'border-blue-700 bg-blue-700 text-white shadow-sm';
+  if (isActive(step)) return 'border-blue-300 bg-blue-300 text-blue-950 shadow-sm shadow-blue-900/40';
   if (isCompleted(step, index)) return 'border-emerald-600 bg-emerald-600 text-white';
-  return 'border-blue-100 bg-blue-50/60 text-slate-400';
+  return 'border-slate-700 bg-slate-900 text-slate-500';
 };
 
 const getTitleStyles = (step, index) => {
-  if (isActive(step)) return 'text-blue-800';
-  if (isCompleted(step, index)) return 'text-slate-950';
+  if (isActive(step)) return 'text-blue-100';
+  if (isCompleted(step, index)) return 'text-white';
   return 'text-slate-500';
 };
 
 const getStateStyles = (step, index) => {
-  if (isActive(step)) return 'text-blue-700';
-  if (isCompleted(step, index)) return 'text-emerald-700';
+  if (isActive(step)) return 'text-blue-200';
+  if (isCompleted(step, index)) return 'text-emerald-300';
   if (step.optional) return 'text-slate-400';
-  return 'text-slate-400';
+  return 'text-slate-500';
 };
 </script>
